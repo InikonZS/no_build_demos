@@ -1,0 +1,16 @@
+.bt_sel{
+  border-style:solid;
+}
+.bt_unsel{
+  border-style:none;
+}
+.dash{
+  width:100%;
+  position: relative;
+  overflow: hidden;
+  min-height: 500px;
+  background-color:#000;
+}
+.menu{
+  display: flex;
+}

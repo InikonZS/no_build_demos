@@ -22,4 +22,4 @@
 
 [keyboard](https://inikonzs.github.io/no_build_demos/keyboard/empty.html)
 
-[keyboard](https://inikonzs.github.io/no_build_demos/css_only_slider/index.html)
+[css_slider](https://inikonzs.github.io/no_build_demos/css_only_slider/index.html)

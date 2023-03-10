@@ -1,0 +1,23 @@
+{
+  "name": "testrepoforstream",
+  "version": "1.0.0",
+  "description": "",
+  "main": "secondFile.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "npx sass ./src/st.scss ./dist/st.css"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/InikonZS/testRepoForStream.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/InikonZS/testRepoForStream/issues"
+  },
+  "homepage": "https://github.com/InikonZS/testRepoForStream#readme",
+  "dependencies": {
+    "sass": "^1.39.0"
+  }
+}

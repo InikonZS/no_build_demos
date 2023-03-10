@@ -8,3 +8,7 @@
 
 [polymesh](https://inikonzs.github.io/no_build_demos/polymesh/test.html)
 
+[cubes_demo](https://inikonzs.github.io/no_build_demos/test1/canvas/index.html)
+
+[links_spa_override](https://inikonzs.github.io/no_build_demos/test1/router/index.html)
+

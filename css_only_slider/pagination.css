@@ -1,0 +1,44 @@
+.pagination{
+  background-color: #ccc;
+  display: flex;
+  border-bottom-right-radius: 24px;
+  color: #000;
+}
+
+.slider_pg{
+  margin: 10px;
+  padding: 10px;
+  display: block;
+  border-radius: 100%;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.slider_pg:hover{
+  background-color:#999;
+}
+
+#pg1:checked ~ .slider_wrapper .page1{
+  background-color: #f00;
+}
+
+#pg2:checked ~ .slider_wrapper .page2{
+  background-color: #090;
+}
+
+#pg3:checked ~ .slider_wrapper .page3{
+  background-color: #ff0;
+}
+
+#pg4:checked ~ .slider_wrapper .page4{
+  background-color: #0ff;
+}
+
+@media only screen and (max-width: 768px){
+  .pagination{
+    border-bottom-right-radius: 0px;
+  }
+}

@@ -1,0 +1,199 @@
+.reward_counter{
+  position: absolute;
+  z-index: 11;
+  background-color: #444;
+  border-radius: 24px;
+      border-top-right-radius: 24px;
+      border-bottom-left-radius: 24px;
+  padding: 10px;
+  border-bottom-left-radius: 0px;
+  border-top-right-radius: 0px;
+}
+
+.reward_item_animation{
+  overflow: hidden;
+  cursor: default;
+}
+
+.reward_black{
+  background-color: #000;
+border-radius: 15px;
+padding: 4px 15px;
+}
+
+.reward_item{
+  width: 28px;
+  height: 28px;
+  position: relative;
+  font-size: 28px;
+}
+
+.reward_item:hover{
+  transform: scale(1.1);
+}
+
+.rew{
+  display: block;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.secrets_values{
+  position: relative;
+}
+
+.secrets_values::after{
+  position: absolute;
+  content: "0";
+  top: 0px;
+  left: 0px;
+}
+
+.secrets_sizer{
+  position: relative;
+  opacity: 0;
+}
+
+#rw1:checked ~ .slider_wrapper .secrets_values::after {
+  content: "1";
+}
+#rw2:checked ~ .slider_wrapper .secrets_values::after {
+  content: "1";
+}
+#rw3:checked ~ .slider_wrapper .secrets_values::after {
+  content: "1";
+}
+#rw4:checked ~ .slider_wrapper .secrets_values::after {
+  content: "1";
+}
+
+#rw1:checked ~ #rw2:checked ~ .slider_wrapper .secrets_values::after {
+  content: "2";
+}
+#rw1:checked ~ #rw3:checked ~ .slider_wrapper .secrets_values::after {
+  content: "2";
+}
+#rw1:checked ~ #rw4:checked ~ .slider_wrapper .secrets_values::after {
+  content: "2";
+}
+#rw2:checked ~ #rw3:checked ~ .slider_wrapper .secrets_values::after {
+  content: "2";
+}
+#rw2:checked ~ #rw4:checked ~ .slider_wrapper .secrets_values::after {
+  content: "2";
+}
+#rw3:checked ~ #rw4:checked ~ .slider_wrapper .secrets_values::after {
+  content: "2";
+}
+
+#rw1:checked ~ #rw2:checked ~ #rw3:checked ~ .slider_wrapper .secrets_values::after {
+  content: "3";
+}
+#rw1:checked ~ #rw3:checked ~ #rw4:checked ~ .slider_wrapper .secrets_values::after {
+  content: "3";
+}
+#rw1:checked ~ #rw2:checked ~ #rw4:checked ~ .slider_wrapper .secrets_values::after {
+  content: "3";
+}
+#rw2:checked ~ #rw3:checked ~ #rw4:checked ~ .slider_wrapper .secrets_values::after {
+  content: "3";
+}
+
+#rw1:checked ~ #rw2:checked ~ #rw3:checked ~ #rw4:checked ~ .slider_wrapper .secrets_values::after {
+  content: "4";
+}
+
+
+#rw1:checked ~ .slider_wrapper .rew1{
+  transform: scale(0);
+}
+
+#rw1:checked ~ .slider_wrapper .rewa1{
+  transform: scale(0);
+  animation-name: reward_ani;
+  animation-duration: 1s;
+  animation-timing-function: linear;
+}
+
+#rw2:checked ~ .slider_wrapper .rew2{
+  transform: scale(0);
+}
+
+#rw2:checked ~ .slider_wrapper .rewa2{
+  transform: scale(0);
+  animation-name: reward_ani;
+  animation-duration: 1s;
+  animation-timing-function: linear;
+}
+
+#rw3:checked ~ .slider_wrapper .rew3{
+  transform: scale(0);
+}
+
+#rw3:checked ~ .slider_wrapper .rewa3{
+  transform: scale(0);
+  animation-name: reward_ani;
+  animation-duration: 1s;
+  animation-timing-function: linear;
+}
+
+#rw4:checked ~ .slider_wrapper .rew4{
+  transform: scale(0);
+}
+
+#rw4:checked ~ .slider_wrapper .rewa4{
+  transform: scale(0);
+  animation-name: reward_ani;
+  animation-duration: 1s;
+  animation-timing-function: linear;
+}
+
+@keyframes reward_ani {
+  0% {
+    transform: scale(1);  
+  }
+  50% {
+    transform: scale(2);  
+  }
+  100% {
+    transform: scale(0);  
+  }
+}
+
+.reward_congrats{
+  position: absolute;
+  z-index: 12;
+  width: 100%;
+  pointer-events: none;
+  display: flex;
+  justify-content: center;
+  transform: translateY(-200px);
+  -webkit-text-stroke: 1px #000;
+  font-size: 45px;
+  background-color: #f0f;
+  box-shadow: 0px 0px 100px #f9f, 0px 0px 100px #f9f, 0px 0px 100px #f9f;
+}
+
+@keyframes reward_ani_congrats {
+  0% {
+    transform: translateY(-200px); 
+  }
+  10% {
+    transform: translateY(150px);
+  }
+  90% {
+    transform: translateY(150px);
+  }
+  100% {
+    transform: translateY(-200px);  
+  }
+}
+
+#rw1:checked ~ #rw2:checked ~ #rw3:checked ~ #rw4:checked ~ .slider_wrapper .reward_congrats {
+  animation-name: reward_ani_congrats;
+  animation-duration: 3s;
+  animation-timing-function: linear;
+}

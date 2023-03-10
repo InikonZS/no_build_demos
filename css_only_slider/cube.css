@@ -1,0 +1,118 @@
+.box{
+  perspective: 1000px;
+  perspective-origin: center center;
+  transform-style: preserve-3d;
+  position:relative; 
+  width:100%;
+  height:300px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height: 100%;
+}
+
+.side{
+  position:absolute;
+  width:100px;
+  height:100px;
+  background-color:#f00;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-family:arial, sans-serif;
+  font-size:50px;
+  color:#fff;
+  backface-visibility:hidden;
+  transform-origin: center center;
+  opacity:100%;
+  --ox: 100px;
+  --x:9deg;
+  --y:120deg;
+  --ox1: 230px;
+  --x1:55deg;
+  --y1:285deg;
+  animation: infinite;
+  animation-name: three;
+  animation-duration: 3s;
+
+  transition-property: transform;
+  transition-duration: 10s;
+}
+
+.box:hover .side{
+  --x:1000deg;
+  --y:500deg;
+  --x1:1500deg;
+  --y1:700deg;
+  
+}
+
+/*you cannot use vars in animation*/
+@keyframes three{
+  from{
+    --x:0deg;
+  }
+  to{
+    --x:360deg;
+  }
+}
+
+.side1{
+  background-color:#f00;
+  transform: rotateY(var(--y)) rotateX(var(--x))  translate3d(var(--ox), 0px, 50px);
+}
+
+.side2{
+  background-color:#990;
+  transform: rotateY(var(--y)) rotateX(calc(var(--x) + 90deg))  translate3d(var(--ox), 0px, 50px);
+}
+
+.side3{
+  background-color:#0f0;
+  transform: rotateY(var(--y)) rotateX(calc(var(--x) + 180deg)) translate3d(var(--ox), 0px, 50px);
+}
+
+.side4{
+  background-color:#0f9;
+  transform: rotateY(var(--y)) rotateX(calc(var(--x) + 270deg))  translate3d(var(--ox), 0px, 50px);
+}
+
+.side5{
+  background-color:#f90;
+  transform: rotateY(calc(var(--y) + 90deg)) rotateX(0deg) rotateZ(var(--x)) translate3d(0px, 0px, calc(50px + var(--ox)));
+}
+
+.side6{
+  background-color:#909;
+  transform: rotateY(calc(var(--y) - 90deg)) rotateX(0deg) rotateZ(calc(0deg - var(--x))) translate3d(0px, 0px, calc(50px - var(--ox)));
+}
+
+.side21{
+  background-color:#f00;
+  transform: rotateY(var(--y1)) rotateX(var(--x1))  translate3d(var(--ox1), 0px, 50px);
+}
+
+.side22{
+  background-color:#990;
+  transform: rotateY(var(--y1)) rotateX(calc(var(--x1) + 90deg))  translate3d(var(--ox1), 0px, 50px);
+}
+
+.side23{
+  background-color:#0f0;
+  transform: rotateY(var(--y1)) rotateX(calc(var(--x1) + 180deg)) translate3d(var(--ox1), 0px, 50px);
+}
+
+.side24{
+  background-color:#0f9;
+  transform: rotateY(var(--y1)) rotateX(calc(var(--x1) + 270deg))  translate3d(var(--ox1), 0px, 50px);
+}
+
+.side25{
+  background-color:#f90;
+  transform: rotateY(calc(var(--y1) + 90deg)) rotateX(0deg) rotateZ(var(--x1)) translate3d(0px, 0px, calc(50px + var(--ox1)));
+}
+
+.side26{
+  background-color:#909;
+  transform: rotateY(calc(var(--y1) - 90deg)) rotateX(0deg) rotateZ(calc(0deg - var(--x1))) translate3d(0px, 0px, calc(50px - var(--ox1)));
+}

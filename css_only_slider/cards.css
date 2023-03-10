@@ -1,0 +1,87 @@
+
+.carddemo {
+  display: flex;
+  padding-left: 60px;
+  padding-top: 20px;
+  --card-height: 400px;
+  --card-width: calc(var(--card-height) / 7 * 4.7);
+}
+
+.carddemo_child {
+  flex-shrink: 0;
+  width: calc((100% - var(--card-width)) / 5 );
+  transition: 0.5s all ease;
+  padding: 25px 0;
+  padding-top: calc(25px + 40px);
+}
+
+.carddemo_child:hover {
+  width: calc(var(--card-width) + 20px);
+}
+
+.carddemo_child:hover .shadow {
+  transform: rotateZ(10deg);
+}
+
+.shadow {
+  box-shadow: -10px 0px 45px 0px #0009;
+  width: var(--card-width);
+  height: calc(var(--card-height) - 50px);
+  margin: 0 10px;
+  transition: 0.5s all ease;
+  transition-property: transform;
+  position: relative;
+  transform-origin: right top;
+}
+
+.card {
+  height: var(--card-height);
+  position: relative;
+  top: -25px;
+  background-image: url('./assets/cards.png');
+  background-size: 1300% 500%;
+  background-position-x: calc(100% / 12 *13);
+  background-position-y: calc(100% / 4 * 2);
+}
+
+.card1{
+  background-position-x: calc(100% / 12 *9);
+  background-position-y: calc(100% / 4 * 0);
+}
+
+.card2{
+  background-position-x: calc(100% / 12 *10);
+  background-position-y: calc(100% / 4 * 1);
+}
+
+.card3{
+  background-position-x: calc(100% / 12 *11);
+  background-position-y: calc(100% / 4 * 2);
+}
+
+.card4{
+  background-position-x: calc(100% / 12 *12);
+  background-position-y: calc(100% / 4 * 3);
+}
+
+.card5{
+  background-position-x: calc(100% / 12 *13);
+  background-position-y: calc(100% / 4 * 0);
+}
+
+@media only screen and (max-width: 768px){
+  
+  .carddemo {
+    display: flex;
+    padding-left: 10px;
+    --card-height: 300px;
+  }
+}
+
+@media only screen and (max-width: 420px){
+  .carddemo {
+    display: flex;
+    padding-left: 0px;
+    --card-height: 200px;
+  }
+}

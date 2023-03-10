@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <link href="./style.css" rel="stylesheet">
+  <link href="./arrows.css" rel="stylesheet">
+  <link href="./pagination.css" rel="stylesheet">
+  <link href="./cards.css" rel="stylesheet">
+  <link href="./slots.css" rel="stylesheet">
+  <link href="./hovered.css" rel="stylesheet">
+  <link href="./cube.css" rel="stylesheet">
+  <link href="./rewards.css" rel="stylesheet">
+</head>
+
+<body>
+  <input id="rw1" name="rw1_" type="checkbox" class="lg">
+  <input id="rw2" name="rw2_" type="checkbox" class="lg">
+  <input id="rw3" name="rw3_" type="checkbox" class="lg">
+  <input id="rw4" name="rw4_" type="checkbox" class="lg">
+
+  <input checked id="pg1" name="pg" type="radio" class="lg">
+  <input id="pg2" name="pg" type="radio" class="lg">
+  <input id="pg3" name="pg" type="radio" class="lg">
+  <input id="pg4" name="pg" type="radio" class="lg">
+  <div class="slider_wrapper">
+    <div class="slider_main">
+      <div class="reward_congrats">Congratulations!</div>
+      <div class="reward_counter">
+        <div class="reward_black">
+          <span>Secrets: </span>
+          <span class="secrets_values">
+            <span class="secrets_sizer">0</span>
+            <!--<span class="secrets_value" id="secrets_value0">0</span>
+            <span class="secrets_value" id="secrets_value1">1</span>
+            <span class="secrets_value" id="secrets_value2">2</span>
+            <span class="secrets_value" id="secrets_value3">3</span>
+            <span class="secrets_value" id="secrets_value4">4</span>-->
+          </span>
+          <span>/4</span>
+        </div>
+      </div>
+
+      <div class="slider_zeros slider_zeros_left">
+        <div class="slider_left">
+          <label for="pg1" class="slider_button left1">left</label>
+          <label for="pg2" class="slider_button left2">left</label>
+          <label for="pg3" class="slider_button left3">left</label>
+          <label for="pg4" class="slider_button left4">left</label>
+          <svg class="slider_left_arrow" height="128px" id="Layer_1" version="1.1"
+            viewBox="0 0 128 128" width="128px" xml:space="preserve" xmlns="http://www.w3.org/2000/svg"
+            xmlns:xlink="http://www.w3.org/1999/xlink">
+            <g>
+              <line style="fill:none;stroke:#2F3435;stroke-width:12;stroke-linecap:square;stroke-miterlimit:10;"
+                x1="40.5" x2="87.5" y1="17" y2="64" />
+              <line style="fill:none;stroke:#2F3435;stroke-width:12;stroke-linecap:square;stroke-miterlimit:10;"
+                x1="87.5" x2="40.5" y1="64" y2="111" />
+            </g>
+          </svg>
+        </div>
+      </div>
+
+      <div class="slides">
+        <div class="slide slide1">
+          <!--<div class="reward_item">
+            <label for="rw1" class="rew rew1"></label>
+            <div class="reward_item_animation rewa1">&#128540;</div>
+          </div>
+          <div class="reward_item">
+            <label for="rw2" class="rew rew2"></label>
+            <div class="reward_item_animation rewa2">&#129392;</div>
+          </div>
+          <div class="reward_item">
+            <label for="rw3" class="rew rew3"></label>
+            <div class="reward_item_animation rewa3">&#128077;</div>
+          </div>
+          <div class="reward_item">
+            <label for="rw4" class="rew rew4"></label>
+            <div class="reward_item_animation rewa4">&#128293;</div>
+          </div>-->
+          <div class="carddemo">
+            <div class="carddemo_child">
+              <div class="shadow">
+                <div class="card card1"></div>
+              </div>
+            </div>
+            <div class="carddemo_child">
+              <div class="shadow">
+                <div class="card card2"></div>
+              </div>
+            </div>
+            <div class="carddemo_child">
+              <div class="shadow">
+                <div class="card card3">
+                  <div class="reward_item reward_item1">
+                    <label for="rw1" class="rew rew1"></label>
+                    <div class="reward_item_animation rewa1">&#128540;</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="carddemo_child">
+              <div class="shadow">
+                <div class="card card4"></div>
+              </div>
+            </div>
+            <div class="carddemo_child">
+              <div class="shadow">
+                <div class="card card5"></div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+        <div class="slide slide2">
+          <input type="checkbox" class="lg" id="lines_selector">
+          <div class="slot_demo">
+            
+            <div class="slot_machine">
+
+              <div class="aspectable_wrapper slot_roll">
+                <div class="aspectable_sizer slot_roll_aspectable">
+                </div>
+                <div class="aspectable_content">
+          
+                  <div class="aspectable_wrapper slot_item" style="--tp:1; --val:9">
+                    <div class="aspectable_sizer">
+                    </div>
+                  </div>
+                  <div class="aspectable_wrapper slot_item" style="--tp:3; --val:11">
+                    <div class="aspectable_sizer">
+                    </div>
+                  </div>
+                  <div class="aspectable_wrapper slot_item" style="--tp:3; --val:4">
+                    <div class="aspectable_sizer">
+                    </div>
+                  </div>
+                  <div class="aspectable_wrapper slot_item" style="--tp:0; --val:10">
+                    <div class="aspectable_sizer">
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="aspectable_wrapper slot_roll">
+                <div class="aspectable_sizer slot_roll_aspectable">
+                </div>
+                <div class="aspectable_content">
+          
+                  <div class="aspectable_wrapper slot_item" style="--tp:2; --val:8">
+                    <div class="aspectable_sizer">
+                    </div>
+                  </div>
+                  <div class="aspectable_wrapper slot_item" style="--tp:0; --val:1">
+                    <div class="aspectable_sizer">
+                    </div>
+                  </div>
+                  <div class="aspectable_wrapper slot_item" style="--tp:1; --val:2">
+                    <div class="aspectable_sizer">
+                    </div>
+                    <div class="aspectable_content">
+                      <div class="reward_item">
+                        <label for="rw3" class="rew rew3"></label>
+                        <div class="reward_item_animation rewa3">&#128077;</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="aspectable_wrapper slot_item" style="--tp:1; --val:6">
+                    <div class="aspectable_sizer">
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="aspectable_wrapper slot_roll">
+                <div class="aspectable_sizer slot_roll_aspectable">
+                </div>
+                <div class="aspectable_content">
+          
+                  <div class="aspectable_wrapper slot_item" style="--tp:3; --val:5">
+                    <div class="aspectable_sizer">
+                    </div>
+                  </div>
+                  <div class="aspectable_wrapper slot_item" style="--tp:1; --val:8">
+                    <div class="aspectable_sizer">
+                    </div>
+                  </div>
+                  <div class="aspectable_wrapper slot_item" style="--tp:2; --val:10">
+                    <div class="aspectable_sizer">
+                    </div>
+                  </div>
+                  <div class="aspectable_wrapper slot_item" style="--tp:2; --val:2">
+                    <div class="aspectable_sizer">
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+            </div>
+            <div class="slot_options">
+              <label for="lines_selector" class="slot_lines">Selected lines: <span class="lines_counter1">2</span><span class="lines_counter2">1</span></label>
+            </div>
+          </div>
+
+        </div>
+        <div class="slide slide3">
+          
+          <div class="hovered_wrapper">
+            <div class="hovered_main">
+              <div class="hovered_list">
+                <div class="hovered_item hovered_item1"> Just </div>
+                <div class="hovered_item hovered_item2"> Hover </div>
+                <div class="hovered_item hovered_item3"> Animation </div>
+                <div class="hovered_item hovered_item4"> 
+                  Demo 
+                  <div class="reward_item reward_item2">
+                    <label for="rw2" class="rew rew2"></label>
+                    <div class="reward_item_animation rewa2">&#129392;</div>
+                  </div>
+                </div>
+              </div>
+              <div class="hovered_list_right">
+                <div class="hovered_item hovered_item5"> 
+                  <div class="hovered_icon">
+                    !
+                  </div> 
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+        <div class="slide slide4">
+
+          <div class="box">
+            <div class="side side1">1</div>
+            <div class="side side2">2</div>
+            <div class="side side3">3</div>
+            <div class="side side4">4</div>
+            <div class="side side5">5</div>
+            <div class="side side6">6</div>
+
+            <div class="side side21">
+              A
+              <div class="reward_item">
+                <label for="rw4" class="rew rew4"></label>
+                <div class="reward_item_animation rewa4">&#128293;</div>
+              </div>
+            </div>
+            <div class="side side22">B</div>
+            <div class="side side23">C</div>
+            <div class="side side24">D</div>
+            <div class="side side25">E</div>
+            <div class="side side26">F</div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="slider_zeros slider_zeros_right">
+        <div class="slider_right">
+          <label for="pg1" class="slider_button right1">right</label>
+          <label for="pg2" class="slider_button right2">right</label>
+          <label for="pg3" class="slider_button right3">right</label>
+          <label for="pg4" class="slider_button right4">right</label>
+          <svg class="slider_right_arrow" height="128px" id="Layer_1" version="1.1"
+            viewBox="0 0 128 128" width="128px" xml:space="preserve" xmlns="http://www.w3.org/2000/svg"
+            xmlns:xlink="http://www.w3.org/1999/xlink">
+            <g>
+              <line style="fill:none;stroke:#2F3435;stroke-width:12;stroke-linecap:square;stroke-miterlimit:10;"
+                x1="40.5" x2="87.5" y1="17" y2="64" />
+              <line style="fill:none;stroke:#2F3435;stroke-width:12;stroke-linecap:square;stroke-miterlimit:10;"
+                x1="87.5" x2="40.5" y1="64" y2="111" />
+            </g>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <div class="bottom_wrapper">
+      <div class="texts_cell">
+        <div class="texts">
+          <div class="text text1">Take a card</div>
+          <div class="text text2">Roll it</div>
+          <div class="text text3">Hover it</div>
+          <div class="text text4">It`s css only</div>
+        </div>
+      </div>
+
+      <div class="pagination">
+        <label for="pg1" class="slider_pg page1">1</label>
+        <label for="pg2" class="slider_pg page2">2</label>
+        <label for="pg3" class="slider_pg page3">3</label>
+        <label for="pg4" class="slider_pg page4">4</label>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>

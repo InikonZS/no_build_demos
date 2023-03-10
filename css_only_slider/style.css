@@ -1,0 +1,155 @@
+*{
+  box-sizing: border-box;
+}
+
+body{
+  margin: 0px;
+  background-color: #000;
+  color: #fff;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 18px;
+  letter-spacing: 0.5px;
+}
+
+.lg{
+  display:none; 
+}
+
+.texts_cell{
+  width: 100%;
+overflow: hidden;
+height: 50px;
+border-bottom-left-radius: 24px;
+}
+
+.slider_wrapper{
+  padding: 20px;
+  width: 100%;
+  max-width: 800px;
+  margin: auto;
+  height: calc(100vh - 20px);
+  display: flex;
+  flex-direction: column;
+  min-width: 320px;
+  min-height: 470px;
+}
+
+.slider_main{
+  display: flex;
+  height: 100%;
+  border-top-left-radius: 24px;
+  border-top-right-radius: 24px;
+  overflow: hidden;
+  position: relative;
+}
+
+.slides{
+  display: flex;
+  width: 100%;
+  overflow: hidden;
+  height: 100%;
+}
+
+.slide{
+  width: 100%;
+  flex-shrink: 0;
+  transition-duration: 400ms;
+  padding: 0px 40px;
+  height: 100%;
+}
+
+.texts{
+  display: flex;
+overflow: hidden;
+width: calc(100% + 20px);
+border: 20px solid #444;
+height: calc(100% + 20px);
+border-radius: 100px;
+position: relative;
+top: -10px;
+left: -10px;
+}
+
+.text{
+  display: flex;
+  width: 100%;
+  flex-shrink: 0;
+  transition-duration: 400ms;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+}
+
+.bottom_wrapper{
+  display: flex;
+  justify-content: space-between;
+}
+
+@media only screen and (max-width: 768px){
+  .bottom_wrapper{
+    flex-direction: column-reverse;
+  }
+
+  .pagination{
+    width: 100%;
+    justify-content: center;
+  }
+
+  .text{
+    justify-content: center;
+  }
+
+  .texts_cell{
+    border-bottom-right-radius: 24px;
+  }
+}
+
+#pg1:checked ~ .slider_wrapper .slide1{
+  background-color: #f00;
+}
+
+#pg2:checked ~ .slider_wrapper .slide2{
+  background-color: #090;
+}
+
+#pg3:checked ~ .slider_wrapper .slide3{
+  background-color: #ff0;
+}
+
+#pg4:checked ~ .slider_wrapper .slide4{
+  background-color: #0ff;
+}
+
+#pg1:checked ~ .slider_wrapper .slide{
+  transform: translate(0%);
+}
+
+#pg2:checked ~ .slider_wrapper .slide{
+  transform: translate(-100%);
+}
+
+#pg3:checked ~ .slider_wrapper .slide{
+  transform: translate(-200%);
+}
+
+#pg4:checked ~ .slider_wrapper .slide{
+  transform: translate(-300%);
+}
+
+
+
+#pg1:checked ~ .slider_wrapper .text{
+  transform: translate(0%);
+}
+
+#pg2:checked ~ .slider_wrapper .text{
+  transform: translate(-100%);
+}
+
+#pg3:checked ~ .slider_wrapper .text{
+  transform: translate(-200%);
+}
+
+#pg4:checked ~ .slider_wrapper .text{
+  transform: translate(-300%);
+}

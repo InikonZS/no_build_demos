@@ -21,3 +21,5 @@
 [gem_puzzle](https://inikonzs.github.io/no_build_demos/gem_puzzle/index.html)
 
 [keyboard](https://inikonzs.github.io/no_build_demos/keyboard/empty.html)
+
+[keyboard](https://inikonzs.github.io/no_build_demos/css_only_slider/index.html)

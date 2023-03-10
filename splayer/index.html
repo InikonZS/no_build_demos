@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>test-application</title>
+        <link rel="stylesheet" type="text/css" href="style.css">
+    </head>
+    <body>
+        <div class="wrapper clearfix">
+            <div class="toolbar">
+            </div>
+            <div class="sidebar">
+                    <div class="sidebar_item" id="tool0" onclick="app.selTool(0); app.render();">
+                        select
+                    </div>
+                    <div class="sidebar_item" id="tool1" onclick="app.selTool(1); app.render();">
+                        spline
+                    </div>
+                    <div class="sidebar_item" id="" onclick="app.board.groupe()">
+                        group
+                    </div>
+                    <div class="sidebar_item" id="" onclick="app.board.unGroupe()">
+                        ungroup
+                    </div>
+                    <div class="sidebar_item" id="" onclick="app.base.add('model',app.selection.dublicate()); app.render();">
+                        to base
+                    </div>
+                    <div class="sidebar_item" id="" onclick="if (app.base.selection){app.board.entries.push(app.base.items[app.base.selIndex].model.dublicate()); app.render();}">
+                        from base
+                    </div>
+                    <div class="sidebar_item clearfix" id="" >
+                        <div class="sidebar_item_s" onmousedown="md()" onmousemove="mv()" id="" >
+                        -    
+                        </div> 
+                        <div class="sidebar_item_s"  id="wid" >
+                                w    
+                        </div>    
+                        <div class="sidebar_item_s"  id="" >
+                        +    
+                        </div>       
+                    </div>
+                    <div class="sidebar_item" id="" onclick="app.setScale(app.scale*2)">
+                        zoom+
+                    </div>
+                    <div class="sidebar_item" id="" onclick="app.setScale(app.scale/2)">
+                        zoom-
+                    </div>
+            </div>
+            <div class="main">
+                <canvas width="800px" height="700px" id="wnd" oncontextmenu="return false"></canvas> 
+            </div>
+            <div class="basebar">
+                    <p>sdfg</p>
+                    <p>gdfg</p>
+                    <p>Clicgf</p>
+                    <p>Presfg</p>
+                    <p>Use toog</p>
+                    <p>Use tode</p>
+                    <p>sdfg</p>
+                    <p>gdfg</p>
+                    <p>Clicgf</p>
+                    <p>Presfg</p>
+                    <p>Use toog</p>
+                    <p>Use tode</p>
+                    <p>sdfg</p>
+                    <p>gdfg</p>
+                    <p>Clicgf</p>
+                    <p>Presfg</p>
+                    <p>Use toog</p>
+                    <p>Use tode</p>
+                    
+            </div>
+            <div class="rightbar">
+                    <p>Click left mouse button to draw spline</p>
+                    <p>Click right button to finish spline</p>
+                    <p>Click right button to select spline and drag markers to edit it</p>
+                    <p>Press Delete button to delete selected spline</p>
+                    <p>Use tool Select to edit spline by left button</p>
+                    <p>Use tool Spline to draw new spline</p>
+            </div>
+        </div>
+        <script src="clean.js"></script>
+    </body>
+</html>

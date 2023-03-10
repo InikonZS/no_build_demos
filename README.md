@@ -13,3 +13,5 @@
 [links_spa_override](https://inikonzs.github.io/no_build_demos/test1/router/index.html)
 
 [css_animations](https://inikonzs.github.io/no_build_demos/css_animations/index.html)
+
+[splayer_polyline_editor](https://inikonzs.github.io/no_build_demos/splayer/index.html)

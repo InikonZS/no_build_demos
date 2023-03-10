@@ -23,3 +23,5 @@
 [keyboard](https://inikonzs.github.io/no_build_demos/keyboard/empty.html)
 
 [css_slider](https://inikonzs.github.io/no_build_demos/css_only_slider/index.html)
+
+[tetris](https://inikonzs.github.io/no_build_demos/tetris/index.html)

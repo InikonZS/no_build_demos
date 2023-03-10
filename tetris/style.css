@@ -1,0 +1,22 @@
+h1 {
+    background-color: #f00;
+}
+
+.gameField_row {
+    display: flex;
+    width: 100%;
+}
+
+.gameField_cell {
+    width: 30px;
+    height: 30px;
+    margin: 5px;
+}
+
+.gameField_cell__active {
+    background-color: #444;
+}
+
+.gameField_cell__inactive {
+    background-color: #ccc;
+}

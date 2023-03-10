@@ -19,3 +19,5 @@
 [bookshop](https://inikonzs.github.io/no_build_demos/bookshop/index.html)
 
 [gem_puzzle](https://inikonzs.github.io/no_build_demos/gem_puzzle/index.html)
+
+[keyboard](https://inikonzs.github.io/no_build_demos/keyboard/empty.html)

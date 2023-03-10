@@ -1,0 +1,153 @@
+body{
+	padding:0px;
+	margin:0px;
+}
+
+.wrapper{
+	margin: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    max-width: 1020px;
+    background-color: #cbd38e;
+    font-family: sans-serif, arial;
+    font-size: 9pt;
+}
+
+.key-board{
+	border-style: solid;
+    border-width: 1px;
+    max-width: 640px;
+    width: 100%;
+    margin: 0px;
+	box-sizing: border-box;
+	background-image: linear-gradient(#aaa9, #fff9);
+	border-radius: 8px;
+	border-color: #00000080;
+	user-select: none;
+}
+
+.hint{
+	border-style: solid;
+    border-width: 1px;
+    max-width: 640px;
+    width: 100%;
+	margin: 0px;
+	margin-top: 10px;
+	padding: 5px;
+	text-align: center;
+	box-sizing: border-box;
+	background-image: linear-gradient(#aaa9, #fff9);
+	border-radius: 8px;
+	border-color: #00000080;
+	user-select: none;
+}
+
+.output{
+	border-style: solid;
+    border-color: 0;
+    border-width: 1px;
+    max-width: 640px;
+    min-height: 100px;
+    width: 100%;
+    overflow-y: auto;
+    resize: vertical;
+    background-color: #00000000;
+    box-sizing: border-box;
+    margin: 0px;
+	margin-bottom: 10px;
+	background-image: linear-gradient(#fff9, #ddd9);
+    border-radius: 8px;
+	border-color: #00000080;
+	padding: 5px;
+	font-size: 9pt;
+}
+
+.output:focus{
+	outline-style:none;
+}
+
+.key-row{
+	display:flex;
+	justify-content:space-between;
+	border-style:none;
+	user-select: none;
+}
+
+.key-button{
+	align-items: center;
+	justify-content: center;
+	display: flex;
+	cursor:default;
+	width:30px;
+	height:30px;
+	flex-basis:35px;
+	margin:3px;
+	overflow:hidden;
+	text-align:center;
+	border-style:solid;
+	border-radius:4px;
+	background-color:#aaaaaa;
+	border-width:1px;
+	border-color:#000000;
+	transition-duration: 300ms;
+    transition-property: transform;
+    transition-timing-function: linear;
+	transform: scale(1);
+	border-top-color: #888;
+	border-left-color: #888;
+	user-select: none;
+
+}
+
+.key-button-active{
+	background-color:#5555ff;
+	transform: scale(0.85);
+	border-bottom-color: #888;
+	border-right-color: #888;
+	border-top-color: #000;
+	border-left-color: #000;
+
+}
+
+.key-button:hover{
+	border-color:#5555ff;
+	border-bottom-color: #22f;
+	border-right-color: #22f;
+}
+
+#Space{
+	flex-basis:270px;
+	flex-grow:1;
+}
+#ShiftLeft{
+	flex-basis:100px;
+	flex-grow:1;
+}
+#ShiftRight{
+	flex-basis:70px;
+	flex-grow:1;
+}
+#Capslock{
+	flex-basis:70px;
+	flex-grow:1;
+}
+#Tab{
+	flex-basis:50px;
+	flex-grow:1;
+}
+#Backspace{
+	flex-basis:70px;
+	flex-grow:1;
+}
+#Enter{
+	flex-basis:70px;
+	flex-grow:1;
+}
+#BackSlash{
+	flex-basis:50px;
+	flex-grow:1;
+}
+

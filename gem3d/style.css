@@ -1,0 +1,308 @@
+body {
+    background-color: #000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    padding: 0px;
+    margin: 0px;
+    flex-direction: column;
+}
+
+.scene_truncer {
+    overflow: hidden;
+    height: 100%;
+    width: 100%;
+    padding-top: 150px;
+}
+
+.scene_area {
+    perspective: 1000px;
+    perspective-origin: center center;
+    transform-style: preserve-3d;
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transform: scale3d(1.2, 1.2, 1.2);
+}
+
+@media only screen and (max-width:768px) {
+    .scene_area {
+        transform: scale3d(1.0, 1.0, 1.0);
+    }
+}
+
+@media only screen and (max-width:640px) {
+    .scene_area {
+        transform: scale3d(0.9, 0.9, 0.9);
+    }
+}
+
+@media only screen and (max-width:540px) {
+    .scene_area {
+        transform: scale3d(0.8, 0.8, 0.8);
+    }
+}
+
+@media only screen and (max-width:440px) {
+    .scene_area {
+        transform: scale3d(0.7, 0.7, 0.7);
+    }
+}
+
+@media only screen and (max-width:340px) {
+    .scene_area {
+        transform: scale3d(0.6, 0.6, 0.6);
+    }
+}
+
+@media only screen and (max-width:270px) {
+    .scene_area {
+        transform: scale3d(0.5, 0.5, 0.5);
+    }
+}
+
+
+@media only screen and (max-height:840px) {
+    .scene_area {
+        transform: scale3d(0.9, 0.9, 0.9);
+    }
+}
+
+@media only screen and (max-height:740px) {
+    .scene_area {
+        transform: scale3d(0.8, 0.8, 0.8);
+    }
+}
+
+@media only screen and (max-height:640px) {
+    .scene_area {
+        transform: scale3d(0.7, 0.7, 0.7);
+    }
+}
+
+@media only screen and (max-height:540px) {
+    .scene_area {
+        transform: scale3d(0.6, 0.6, 0.6);
+    }
+}
+
+@media only screen and (max-height:440px) {
+    .scene_area {
+        transform: scale3d(0.5, 0.5, 0.5);
+    }
+}
+
+
+.box_wrapper {
+    transform-style: preserve-3d;
+}
+
+.side {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    background-color: #f00;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: arial, sans-serif;
+    font-size: 50px;
+    color: #fff;
+    backface-visibility: visible;
+    transform-origin: center center;
+    opacity: 90%;
+    user-select: none;
+    text-shadow: #000 0px 0px 6px, #000 0px 0px 2px;
+}
+
+.side:hover {
+    background-color: #0009;
+    opacity: 80%;
+}
+
+.side1 {
+    background-color: #fff;
+    background-image: url('https://www.rulez-t.info/uploads/posts/2014-11/1415461776_nature_background_01.jpg');
+    background-size: calc(100% * 4) calc(100% * 4);
+    background-blend-mode: darken;
+}
+
+.side2 {
+    background-color: #990;
+}
+
+.side3 {
+    background-color: #0f0;
+}
+
+.side4 {
+    background-color: #0f9;
+}
+
+.side5 {
+    background-color: #f90;
+}
+
+.side6 {
+    background-color: #909;
+}
+
+.header_zeros {
+    height: 0px;
+    width: 100%;
+    position: relative;
+}
+
+.header {
+    height: 100px;
+    width: 100%;
+    display: flex;
+    padding: 30px;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: space-between;
+}
+
+.burger_group {
+    position: relative;
+    height: 100px;
+    width: 100px;
+    flex-shrink: 0;
+}
+
+.burger {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    box-sizing: border-box;
+    background-size: contain;
+}
+
+.ico_settings {
+    background-image: url(settings.svg);
+}
+
+.burger_back {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    box-sizing: border-box;
+    background-size: contain;
+    cursor: pointer;
+    transition-duration: 400ms;
+    border-radius: 10px;
+}
+
+.burger_group:hover .burger_back {
+    box-shadow: #fff9 0px 0px 15px;
+    background-color: #fff4;
+
+}
+
+.clock {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    box-sizing: border-box;
+    background-size: contain;
+    padding-top: 30px;
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+.clock_back {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    box-sizing: border-box;
+    background-size: contain;
+    cursor: pointer;
+    transition-duration: 400ms;
+    border-radius: 10px;
+    color: #fff;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 30px;
+    display: flex;
+    justify-content: center;
+}
+
+.burger_group:hover .clock_back {
+    box-shadow: #fff9 0px 0px 15px;
+    background-color: #fff4;
+}
+
+.clock_canvas {
+    height: 100%;
+    width: 100%;
+}
+
+.main_menu {
+    width: 100%;
+    height: 100vh;
+    position: absolute;
+    padding-top: 200px;
+    background-color: #000d;
+    z-index: 3;
+    transform: translate(-100%, 0px);
+    transition-duration: 400ms;
+    box-sizing: border-box;
+}
+
+.main_menu_shown {
+    transform: translate(0%, 0px);
+}
+
+.selector {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+}
+
+.selector_variants {
+    display: flex;
+    width: 100%;
+    height: 63px;
+    overflow: hidden;
+    position: relative;
+}
+
+.selector_variant {
+    width: 100%;
+    flex-shrink: 0;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    height: 100%;
+    position: absolute;
+    transition-duration: 400ms;
+    transform: translate(-100%, 0px);
+    color: #fff;
+    font-size: 40px;
+}
+
+.selector_button {
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    background-image: url('./chev_l.png');
+    background-size: 100%;
+    background-repeat: no-repeat no-repeat;
+    background-position: center;
+    width: 50px;
+    flex-shrink: 0;
+    transition-duration: 400ms;
+    border-radius: 10px;
+}
+
+.selector_button_right {
+    transform: scale(-1);
+}
+
+.selector_button:hover {
+    box-shadow: #fff9 0px 0px 15px;
+    background-color: #fff4;
+}

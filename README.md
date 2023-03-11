@@ -31,3 +31,5 @@
 [task_resolver_for_worms_chain_explodes](https://inikonzs.github.io/no_build_demos/task_resolver/index.html)
 
 [canvas_mouse_move](https://inikonzs.github.io/no_build_demos/canvas_points/index.html)
+
+[gem_puzzle_3d](https://inikonzs.github.io/no_build_demos/gem3d/index.html)

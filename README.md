@@ -27,3 +27,5 @@
 [tetris](https://inikonzs.github.io/no_build_demos/tetris/index.html)
 
 [canvas_3d_cubes_walk_around](https://inikonzs.github.io/no_build_demos/canvas3d/index.html)
+
+[task_resolver_for_worms_chain_explodes](https://inikonzs.github.io/no_build_demos/task_resolver/index.html)

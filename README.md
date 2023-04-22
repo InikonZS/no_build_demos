@@ -35,3 +35,5 @@
 [canvas_mouse_move](https://inikonzs.github.io/no_build_demos/canvas_points/index.html)
 
 [gem_puzzle_3d](https://inikonzs.github.io/no_build_demos/gem3d/index.html)
+
+[hex_grid](https://inikonzs.github.io/no_build_demos/hex_grid/hex.html)

@@ -1,0 +1,69 @@
+*{
+    box-sizing: border-box;
+}
+
+body{
+    margin: 0;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #000;
+}
+
+.wrapper{
+    --base: 1.6;
+    background-color: #f002;
+    font-size: calc(var(--base) * 30px);
+    width: calc(var(--base) * 300px);
+    height: calc(var(--base) * 400px);
+    display: flex;
+    flex-direction: column;
+}
+
+.players{
+    display: flex;
+}
+
+.field{
+
+}
+
+.item{
+    width: calc(var(--base) * 50px);
+    height: calc(var(--base) * 50px);
+    border-radius: calc(var(--base) * 5px);
+    margin: calc(var(--base) * 5px);
+    background-color: #ff0;
+}
+
+.player{
+    background-color: #f90;
+    border-radius: calc(var(--base) * 5px);
+    margin: calc(var(--base) * 5px);
+    font-size: calc(var(--base) * 10px);
+}
+
+.player_name{
+    font-size: calc(var(--base) * 20px);
+}
+
+@media (min-aspect-ratio: 1/1) {
+    .players{
+        flex-direction: column;
+    }
+
+    .wrapper{
+        flex-direction: row-reverse;
+        justify-content: center;
+        width: calc(var(--base) * 600px);
+        height: calc(var(--base) * 400px);
+    }
+}
+
+@media (min-width: 768px) and (min-height: 420px){
+    .field{
+        background-color: #00f;
+    }
+}

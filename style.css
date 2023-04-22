@@ -58,3 +58,20 @@ h3{
     color: #fff;
 }
 
+.screens{
+    display: flex;
+    justify-content: center;
+}
+
+.screens_img{
+    width: 100%;
+}
+
+.screens_item{
+    width: 50%;
+    margin: 5px;
+    display: flex;
+    align-items: center;
+}
+
+

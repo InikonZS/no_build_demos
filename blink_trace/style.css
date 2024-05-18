@@ -1,0 +1,42 @@
+*{
+    box-sizing: border-box;
+}
+.items{
+    position: relative;
+    width: 600px;
+    height: 500px;
+    --angle: -50deg;
+}
+
+.item{
+    border-radius: 100%;
+    background-color: #009;
+    position: absolute;
+    border: 1px solid #000;
+    overflow: hidden;
+}
+
+.item_blink{
+    position: absolute;
+    top: -200%;
+    left: -200%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(var(--angle), #fff0 0%, #fff0 40%, #fff9 50%, #fff0 60%, #fff0 100%), 
+    linear-gradient(var(--angle), #fff0 0%, #fff0 49%, #ff0 49%, #ff0 51%, #fff0 51%, #fff0 100%)
+}
+
+.blink .item_blink{
+    animation: blink_ani 2s forwards linear;
+}
+
+@keyframes blink_ani{
+    0%{
+        top: -200%;
+        left: -200%;
+    }
+    100%{
+        top: 200%;
+        left: 200%;
+    }
+}

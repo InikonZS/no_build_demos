@@ -49,10 +49,35 @@ const forward = [
 ]
 
 function getAngle(_a, _b, c){
-    //console.log(_a, _b, c);
     const a = {x: _a.x - c.x, y: _a.y - c.y}
     const b = {x: _b.x - c.x, y: _b.y - c.y}
+    if ((a.x*b.x + a.y*b.y) / (Math.hypot(a.x, a.y)* Math.hypot(b.x,b.y)) <-1){
+       return Math.acos(-1);
+    }
+    
+
     return Math.acos((a.x*b.x + a.y*b.y) / (Math.hypot(a.x, a.y)* Math.hypot(b.x,b.y)))
+}
+
+function getPointWeight(arr, i){
+    const angles = [];
+    for (let k = 1; k<25; k++){
+        const a = arr[i-k>=0 ? (i-k) : (arr.length-i-k)];
+        const b = arr[(i+k) % arr.length];
+        const c = arr[i];
+        const ang = getAngle(a, b, c);
+        if (Number.isNaN(ang)){
+            console.log('nan', a, b, c);
+            //angles.push(Math.PI );
+        } else {
+            angles.push(ang);
+        }
+    }
+    const average = angles.reduce((ac, a)=>ac + a, 0) / angles.length;
+    const min = angles.sort((a, b)=>a-b)[0];
+    const max = angles.sort((a, b)=>b-a)[0];
+    //console.log('av', angles, average, min, max);
+    return [average, max, min];
 }
 
 function getVectDist(_a, _b, c){
@@ -123,7 +148,7 @@ findBorder(tst);
 
 function runDemo(){
     const img = document.createElement('img');
-    img.src = './test5.png';
+    img.src = './test1.png';
     img.onload = ()=>{
         const canvas = document.createElement('canvas');
         document.body.append(canvas);
@@ -153,8 +178,15 @@ function runDemo(){
         let lastAng = NaN;
         let optimized = res;
         let  lastSk =false;
-        for (let optIt = 0; optIt<1; optIt++){
+        let skipNext = false;
+        const weights = [];
+        for (let optIt = 0; optIt<5; optIt++){
+        
         optimized = optimized.filter((vect, i, arr)=>{
+            if (skipNext){
+                skipNext =false;
+                return false;
+            }
             const ang = getAngle(arr[i-1>=0?i-1: arr.length-i-1], arr[(i+1)%arr.length],arr[i]);
             const dist = getVectDist(arr[i-1>=0?i-1: arr.length-i-1], arr[(i+1)%arr.length],arr[i]);
             const ang2 = getAngle(arr[i-15>=0?i-15: arr.length-i-15], arr[(i+15)%arr.length],arr[i]);
@@ -162,9 +194,34 @@ function runDemo(){
             const ang3 = getAngle(arr[i-1>=0?i-1: arr.length-i-1], arr[(i+2)%arr.length],arr[i]);
             const ang4 = getAngle(arr[i-2>=0?i-2: arr.length-i-2], arr[(i+1)%arr.length],arr[i]);
             //if (i % 15 != 0) return;
-            console.log(ang);
-            if (/*optIt==0 &&*/ (Math.abs(ang21) > Math.PI - 0.21) || (Math.abs(ang2) > Math.PI - 0.21) || (Math.abs(ang3) > Math.PI - 0.01) || (Math.abs(ang4) > Math.PI - 0.01)|| (Math.abs(ang) > Math.PI - 0.01)) {
+            //console.log(ang, getPointWeight(arr, i));
+            const [average, max, min] = getPointWeight(arr, i);
+            
+            const [average1, max1, min1] = getPointWeight(arr, (i+1)%arr.length);
+            //if (average>Math.PI -0.51 && max> Math.PI -0.02){
+                //return false;
+                //weights.push(5* (average< Math.PI -0.5));
+                //weights.push(3* (max< Math.PI -0.1));
+                //weights.push(5* (min< Math.PI -1.51));
+                //weights.push(5* (max / min > 1));
+            //}
+            if ((max< Math.PI -0.05) || (max1< Math.PI -0.05)){
+                return true;
+            }
+            if (max1>max){
                 return false;
+            } else {
+                skipNext= true;
+            }
+            if ((max> Math.PI -0.05)){
+                //return {max, vect}//false;
+            }
+            if ( (average> Math.PI -0.22)){
+                //return false;
+            }
+            //weights.push(3* (max< Math.PI -0.1));
+            if (/*optIt==0 &&*/ (Math.abs(ang21) > Math.PI - 0.21) || (Math.abs(ang2) > Math.PI - 0.21) || (Math.abs(ang3) > Math.PI - 0.01) || (Math.abs(ang4) > Math.PI - 0.01)|| (Math.abs(ang) > Math.PI - 0.01)) {
+                //return false;
             }
             if(!lastSk && optIt>=1 && dist<7){
                 lastSk = true;
@@ -187,7 +244,7 @@ function runDemo(){
             //lastAng = ang;
             //if (ang >= (Math.PI) || ang <= Math.PI /2) {
             ctx.lineTo(vect.x, vect.y);
-            ctx.fillRect(vect.x-1, vect.y-1, 3, 3);
+            ctx.fillRect(vect.x-1, vect.y-1,3, 3);
             //}
             //ctx.fillRect(vect.x-1, vect.y-1, 4, 4);
         });

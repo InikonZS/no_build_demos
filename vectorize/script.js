@@ -46,7 +46,19 @@ const forward = [
     {x:0, y:-1},
     {x:0, y:1},
     {x:-1, y:0}
-]
+];
+
+function getLinePointDistance(a, b, c){
+    const y0 = c.y;
+    const x0 = c.x;
+    const y1 = a.y;
+    const x1 = a.x;
+    const y2 = b.y;
+    const x2 = b.x;
+    const upper = Math.abs((y2 - y1)*x0 - (x2 - x1)*y0 + x2*y1 - y2*x1);
+    const lower = Math.sqrt((y2 - y1) ** 2 + (x2 - x1) ** 2);
+    return upper / lower;
+}
 
 function getAngle(_a, _b, c){
     const a = {x: _a.x - c.x, y: _a.y - c.y}
@@ -90,7 +102,7 @@ function getVectDistA(_a, _b, c){
     //console.log(_a, _b, c);
     const a = {x: _a.x - c.x, y: _a.y - c.y}
     const b = {x: _b.x - c.x, y: _b.y - c.y}
-    return (Math.abs(a.x - b.x)) == 1 || Math.abs(a.y - b.y) == 1;
+    return ((Math.abs(a.x - b.x)) ==1) || (Math.abs(a.y - b.y) ==1)
 }
 
 
@@ -148,14 +160,41 @@ findBorder(tst);
 
 function runDemo(){
     const img = document.createElement('img');
-    img.src = './test1.png';
+    img.src = './test5.png';
     img.onload = ()=>{
         const canvas = document.createElement('canvas');
         document.body.append(canvas);
         const ctx = canvas.getContext('2d');
         canvas.width = img.naturalWidth;
         canvas.height = img.naturalHeight;
+
+        let isDraw= false;
+        let last = {x:0, y:0}
+        canvas.onmousedown = (e)=>{
+            isDraw = true;
+            last.x = e.offsetX;
+            last.y = e.offsetY;
+            ctx.drawImage(img, 0, 0);
+        }
+        canvas.onmouseup =()=>{
+            isDraw = false;
+            vectorize();
+        }
+        canvas.onmousemove = (e)=>{
+            if (isDraw){
+                ctx.strokeStyle = '#000';
+                ctx.lineCap = 'round';
+                ctx.lineWidth = 20;
+                ctx.beginPath();
+                ctx.moveTo(last.x, last.y);
+                ctx.lineTo(e.offsetX, e.offsetY);
+                last.x = e.offsetX;
+                last.y = e.offsetY;
+                ctx.stroke();
+            }
+        }
         ctx.drawImage(img, 0, 0);
+        const vectorize = ()=>{
         const data = ctx.getImageData(0,0, canvas.width, canvas.height);
         console.log(data);
         const arr = [];
@@ -180,7 +219,7 @@ function runDemo(){
         let  lastSk =false;
         let skipNext = false;
         const weights = [];
-        for (let optIt = 0; optIt<5; optIt++){
+        for (let optIt = 0; optIt<35; optIt++){
         
         optimized = optimized.filter((vect, i, arr)=>{
             if (skipNext){
@@ -196,8 +235,14 @@ function runDemo(){
             //if (i % 15 != 0) return;
             //console.log(ang, getPointWeight(arr, i));
             const [average, max, min] = getPointWeight(arr, i);
-            
+            const dist2 = getLinePointDistance(arr[i-1>=0?i-1: arr.length-i-1], arr[(i+1)%arr.length],arr[i]);
+            const dist3 = getLinePointDistance(arr[i-2>=0?i-2: arr.length-i-2], arr[(i+2)%arr.length],arr[i]);
+            console.log(dist3);
+            if (dist3<500 &&  dist2 <1 * optIt / 20){
+                return i % 2;
+            }
             const [average1, max1, min1] = getPointWeight(arr, (i+1)%arr.length);
+            
             //if (average>Math.PI -0.51 && max> Math.PI -0.02){
                 //return false;
                 //weights.push(5* (average< Math.PI -0.5));
@@ -205,13 +250,28 @@ function runDemo(){
                 //weights.push(5* (min< Math.PI -1.51));
                 //weights.push(5* (max / min > 1));
             //}
-            if ((max< Math.PI -0.05) || (max1< Math.PI -0.05)){
+           /* if (optIt ==2 && dist<3){
+                return false;
+            }
+            if ( ((max< Math.PI -0.25) || (max1< Math.PI -0.25))){
                 return true;
             }
-            if (max1>max){
+            if (optIt ==0 && i % 12 !=0){
                 return false;
+            }
+            if (optIt ==1 &&(Math.abs(ang2) > Math.PI - 0.08)){
+                return false;
+            }
+            if(optIt ==0 && getVectDistA(arr[i-1>=0?i-1: arr.length-i-1], arr[(i+1)%arr.length],arr[i])){
+                //return false;
+            }
+            if ((max< Math.PI -0.05) || (max1< Math.PI -0.05)){
+                return true;
+            }*/
+            if (max1>max){
+                //return false;
             } else {
-                skipNext= true;
+                //skipNext= true;
             }
             if ((max> Math.PI -0.05)){
                 //return {max, vect}//false;
@@ -244,13 +304,16 @@ function runDemo(){
             //lastAng = ang;
             //if (ang >= (Math.PI) || ang <= Math.PI /2) {
             ctx.lineTo(vect.x, vect.y);
-            ctx.fillRect(vect.x-1, vect.y-1,3, 3);
+            ctx.fillRect(vect.x-2, vect.y-2,4, 4);
             //}
             //ctx.fillRect(vect.x-1, vect.y-1, 4, 4);
         });
         ctx.closePath();
         ctx.stroke();
     }
+    vectorize();
+    }
+
    
 }
 

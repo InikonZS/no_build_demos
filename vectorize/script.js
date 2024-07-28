@@ -1,3 +1,8 @@
+import { initUI } from "./ui.js";
+import { toSvgPath } from "./toSvgPath.js";
+
+initUI();
+
 const tst1 = [
     '00000010000',
     '00110111100',
@@ -66,8 +71,6 @@ function getAngle(_a, _b, c){
     if ((a.x*b.x + a.y*b.y) / (Math.hypot(a.x, a.y)* Math.hypot(b.x,b.y)) <-1){
        return Math.acos(-1);
     }
-    
-
     return Math.acos((a.x*b.x + a.y*b.y) / (Math.hypot(a.x, a.y)* Math.hypot(b.x,b.y)))
 }
 
@@ -132,7 +135,7 @@ function findBorder(img){
     const availableDir = forward.findIndex((it, i )=>{
         const currentForward = forward[currentDirection]; 
         let nextPos = {x: currentPos.x + currentForward.x, y: currentPos.y + currentForward.y};
-        console.log(currentDirection, JSON.stringify(currentPos), img[nextPos.y]?.[nextPos.x]);
+        //console.log(currentDirection, JSON.stringify(currentPos), img[nextPos.y]?.[nextPos.x]);
         if (checkLeftHand(img, nextPos, currentDirection) && img[nextPos.y]?.[nextPos.x] == '1' /*&& res[nextPos.y]?.[nextPos.x] != '2'*/){
             currentPos = nextPos;
             if (res[nextPos.y]?.[nextPos.x] == '2'){
@@ -148,11 +151,11 @@ function findBorder(img){
         currentDirection = currentDirection % 4;
     });
     if (isEnd){
-        console.log('break', k);
+        //console.log('break', k);
         break;
     }
     }
-    console.log(res);
+    //console.log(res);
     return resVect;
 }
 
@@ -219,14 +222,14 @@ function runDemo(){
         let  lastSk =false;
         let skipNext = false;
         const weights = [];
-        for (let optIt = 0; optIt<35; optIt++){
+        for (let optIt = 0; optIt<14; optIt++){
         
         optimized = optimized.filter((vect, i, arr)=>{
             if (skipNext){
                 skipNext =false;
                 return false;
             }
-            const ang = getAngle(arr[i-1>=0?i-1: arr.length-i-1], arr[(i+1)%arr.length],arr[i]);
+            /*const ang = getAngle(arr[i-1>=0?i-1: arr.length-i-1], arr[(i+1)%arr.length],arr[i]);
             const dist = getVectDist(arr[i-1>=0?i-1: arr.length-i-1], arr[(i+1)%arr.length],arr[i]);
             const ang2 = getAngle(arr[i-15>=0?i-15: arr.length-i-15], arr[(i+15)%arr.length],arr[i]);
             const ang21 = getAngle(arr[i-5>=0?i-5: arr.length-i-5], arr[(i+5)%arr.length],arr[i]);
@@ -234,14 +237,14 @@ function runDemo(){
             const ang4 = getAngle(arr[i-2>=0?i-2: arr.length-i-2], arr[(i+1)%arr.length],arr[i]);
             //if (i % 15 != 0) return;
             //console.log(ang, getPointWeight(arr, i));
-            const [average, max, min] = getPointWeight(arr, i);
+            //const [average, max, min] = getPointWeight(arr, i);*/
             const dist2 = getLinePointDistance(arr[i-1>=0?i-1: arr.length-i-1], arr[(i+1)%arr.length],arr[i]);
             const dist3 = getLinePointDistance(arr[i-2>=0?i-2: arr.length-i-2], arr[(i+2)%arr.length],arr[i]);
             console.log(dist3);
-            if (dist3<500 &&  dist2 <1 * optIt / 20){
+            if (dist3<500 &&  dist2 <(1 * 1.1 ** optIt)/2){
                 return i % 2;
             }
-            const [average1, max1, min1] = getPointWeight(arr, (i+1)%arr.length);
+            //const [average1, max1, min1] = getPointWeight(arr, (i+1)%arr.length);
             
             //if (average>Math.PI -0.51 && max> Math.PI -0.02){
                 //return false;
@@ -268,7 +271,7 @@ function runDemo(){
             if ((max< Math.PI -0.05) || (max1< Math.PI -0.05)){
                 return true;
             }*/
-            if (max1>max){
+            /*if (max1>max){
                 //return false;
             } else {
                 //skipNext= true;
@@ -278,18 +281,19 @@ function runDemo(){
             }
             if ( (average> Math.PI -0.22)){
                 //return false;
-            }
+            }*/
             //weights.push(3* (max< Math.PI -0.1));
-            if (/*optIt==0 &&*/ (Math.abs(ang21) > Math.PI - 0.21) || (Math.abs(ang2) > Math.PI - 0.21) || (Math.abs(ang3) > Math.PI - 0.01) || (Math.abs(ang4) > Math.PI - 0.01)|| (Math.abs(ang) > Math.PI - 0.01)) {
+           // if (/*optIt==0 &&*/ 
+           // (Math.abs(ang21) > Math.PI - 0.21) || (Math.abs(ang2) > Math.PI - 0.21) || (Math.abs(ang3) > Math.PI - 0.01) || (Math.abs(ang4) > Math.PI - 0.01)|| (Math.abs(ang) > Math.PI - 0.01)) {
                 //return false;
-            }
-            if(!lastSk && optIt>=1 && dist<7){
+           // }
+           /* if(!lastSk && optIt>=1 && dist<7){
                 lastSk = true;
               //  return false;
             }
-            lastSk = false;
+            lastSk = false;*/
             //if (Math.abs(ang - ang2) <0.11) return false;
-            lastAng = ang;
+           // lastAng = ang;
             return true;
         });
         }
@@ -310,6 +314,9 @@ function runDemo(){
         });
         ctx.closePath();
         ctx.stroke();
+
+        const svg = document.querySelector('.dest-svg');
+        svg.innerHTML = toSvgPath(optimized);
     }
     vectorize();
     }

@@ -240,7 +240,7 @@ function runDemo(){
             //const [average, max, min] = getPointWeight(arr, i);*/
             const dist2 = getLinePointDistance(arr[i-1>=0?i-1: arr.length-i-1], arr[(i+1)%arr.length],arr[i]);
             const dist3 = getLinePointDistance(arr[i-2>=0?i-2: arr.length-i-2], arr[(i+2)%arr.length],arr[i]);
-            console.log(dist3);
+            //console.log(dist3);
             if (dist3<500 &&  dist2 <(1 * 1.1 ** optIt)/2){
                 return i % 2;
             }

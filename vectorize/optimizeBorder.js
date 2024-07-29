@@ -13,7 +13,7 @@ function getLinePointDistance(a, b, c){
 
 export function optimizeByDistances(border){
     let optimized = border;
-    for (let optIt = 0; optIt < 15; optIt++) {
+    for (let optIt = 0; optIt < 12; optIt++) {
         optimized = optimized.filter((vect, i, arr) => {
             const dist = getLinePointDistance(arr[i - 1 >= 0 ? i - 1 : arr.length - i - 1], arr[(i + 1) % arr.length], arr[i]);
             if (dist < (1 * 1.1 ** optIt) / 2) {

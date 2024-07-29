@@ -2,6 +2,7 @@ import { processFile } from './processFile.js';
 import { findBorder } from './findBorder.js';
 import { optimizeByDistances } from './optimizeBorder.js';
 import { toSvgPath } from './toSvgPath.js';
+import { checkFigure } from './fillFigure.js';
 
 const svg = document.querySelector('.dest-svg');
 const canvas = document.querySelector('.source-canvas');
@@ -23,7 +24,7 @@ function toBitmap(ctx, pos) {
             }
             const maxDiff = Math.max(...colors.map((cl, cli)=> Math.abs(cl  - selectColor[cli])))
             //row.push(data.data[i * data.width * 4 + j * 4] == 0 ? '1' : '0');
-            row.push(maxDiff < 10 ? '1' : '0');
+            row.push(maxDiff < 40 ? '1' : '0');
         }
         arr.push(row);
     }
@@ -43,21 +44,28 @@ export function initUI() {
         const clickPoint = { x: e.offsetX, y: e.offsetY }; 
         //ctx.fillRect(clickPoint.x, clickPoint.y, 5, 5);
         const [bitmap, color] = toBitmap(ctx, clickPoint);
-        const clickVal = bitmap[clickPoint.y][clickPoint.x];
-        let point = {...clickPoint};
+        const figPoints = checkFigure(bitmap.map((row, y)=>row.map((cell, x)=>({value: cell, isLocked: cell == '0', x, y}))), clickPoint);
+        const clearBitmap = new Array(bitmap.length).fill(null).map(it=>new Array(bitmap[0].length).fill('0'));
+        figPoints.forEach(it=> {
+            clearBitmap[it.y][it.x] = '1';
+            ctx.fillRect(it.x, it.y, 1,1);
+        });
+        const clickVal = clearBitmap[clickPoint.y][clickPoint.x];
+        let point; //= {...clickPoint};
 
-        while (bitmap[clickPoint.y][point.x+1] == clickVal){
+        /*while (clearBitmap[clickPoint.y][point.x+1] == clickVal){
             point.x+=1;
-        }
-        /*bitmap.forEach((row, y) => {
+        }*/
+        clearBitmap.forEach((row, y) => {
             row.forEach((val, x) => {
                 if (!point && val == '1') {
                     point = { x, y }
                 }
             })
-        });*/
+        });
 
-        const border = findBorder(bitmap, point);
+        const border = findBorder(clearBitmap, point);
+        console.log('border', border);
         const optimized = optimizeByDistances(border);
         svg.innerHTML += toSvgPath(optimized, color);
     }

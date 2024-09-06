@@ -1,3 +1,26 @@
+.images{
+    display: flex;
+    width: 100%;
+    gap: 10px;
+}
 .dest{
-    overflow: scroll;
+    width: 100%;
+}
+
+.dest-svg{
+    width: 100%;
+}
+
+.source{
+    width: 100%;
+}
+
+.source-canvas{
+    width: 100%;
+}
+
+
+
+.source_canvas{
+    width: 100%;
 }

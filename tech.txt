@@ -1,0 +1,115 @@
+# react
+
+- class components and lifecycle
+- functional and hooks
+- react-router
+
+Can init new application with webpack and easy implement it with many structured components.
+
+Can open huge app and fix some bugs or implement new feature not breaking code structure.
+
+Good undestand lifecycle of class and functional components, can perfectly know order of operations and count of component rerenders.
+
+Can read, and make some fixes and minor features at Vue and Angular, have basic knowledge.
+
+Can insert app written in any framework or engine inside other app and connect them by properties and events.
+
+# redux
+- redux-toolkit
+- redux-saga
+- redux-thunk
+
+Can use redux store, dispatch actions and get data from it. Know about optimize rerender count.
+
+Write slices, implement async operations with thunk and saga
+
+# node and database
+- http
+- websocket / ws
+- express
+- nest
+- mongo db
+- postgree sql
+- typeorm
+- graphql
+- docker and docker-compose
+
+# builds
+- webpack
+- es-build
+- cordova
+- electron
+- capacitor
+
+Can configure project build, can write custom webpack plugin or loader.
+
+Can wrap web application to desktop or mobile wrap, install and use cordova plugins and use them.
+
+Can configure builds and deploys at build server like at teamcity service. Connect server with ssh comandline.
+
+# layout and style
+- html
+- css
+- scss
+- svg
+- grid and flex
+- valid adaptive and responsive layout
+- css animations with keyframes
+- usage of modern style properties
+- calc, --var in css
+
+Can make responsive pixel-perfect layout with styles by PSD, Figma, picture.
+
+Can write enough complex logic with only css (boolean math with checkbox state).
+
+Can rewrite pixi or phaser game to html+svg and css render 1:1 (but not shaders of course)
+
+# canvas
+
+- canvas 2d
+- webgl
+- glsl shaders
+- pixi
+- phaser
+- babylon
+- three.js
+- know about mesh, textures, - vertices, indexes, uv, transforms and other
+- deep in matrix and vector - calculation 2d and 3d
+- tweenx and other tools for animate - transitions
+- spine, dragonbones - insert and control in game, work with editor
+
+Can get for example .obj model and render it with pure webgl or 2d canvas, animate rotation or add shooter-camera, handle click and hover at this model.
+
+Can init project with game engine and make demo according technical task.
+
+Can calculate some mathematics on techical university graduation level - matrixes, complex calcs, fourier, crypto with galois field, differential eqs.
+
+# browser api
+
+- sound api
+- camera
+- webRTC
+- speech and recognition api
+- crypto
+- service worker / workbox
+- array buffers / typed arrays/ blob data
+- web workers multithread appications
+- touch events and multitouch handling
+
+Can use a lot of them
+
+# other
+- git
+- svn
+- gitlab / github / bitbucket
+- jira / redmine
+
+Can easy start to work, assign task in jira, move it to in progress state, clone repo with project, commit solution according company commit guideline, create pull-request, log worktime.
+
+Can work with multirepo projects, git-submodules or repo as npm module.
+
+Can resolve git rebase and merge, use file history to find old changes invoked bugs.
+
+Make easy reviewable pull-request not making not relative to task changes.
+
+Write markdown.md docs.

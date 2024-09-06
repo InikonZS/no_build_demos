@@ -33,6 +33,17 @@ function crossLine(a, b){
     }
 }
 
+function lineCrossPoly(poly, a){
+    const crosses = [];
+    poly.forEach((it, i)=>{
+        const cross = crossLine([it, poly[(i+1) %poly.length]], a);
+        if (cross){
+            crosses.push(cross);
+        }
+    });
+    return crosses[0];
+}
+
 function polyArea(poly){
     const a = poly.reduce((ac, it, i, arr)=> ac + (it.x * arr[(i+1) % arr.length].y), 0);
     const b = poly.reduce((ac, it, i, arr)=> ac + (it.y * arr[(i+1) % arr.length].x), 0);
@@ -280,6 +291,7 @@ function init(){
     });
 
     let lastInPoly = false;
+    let lastPointInPoly;
     const render = ()=>{
         requestAnimationFrame(()=>{
             ctx.fillStyle = '#000';
@@ -304,8 +316,8 @@ function init(){
                 ctx.stroke();
             });
 
-            //let inPoly = insidePoly(polys[0], player);
-            let inPoly =false;
+            let inPoly = insidePoly(polys[0], player);
+            /*let inPoly =false;
             polys.forEach(poly=>{
                 let sumAng = 0;
                 poly.forEach((it, i)=>{
@@ -315,10 +327,11 @@ function init(){
                 if (Math.abs(Math.abs(sumAng) - Math.PI * 2) < 0.0000001){
                     inPoly = true;
                 }
-            });
+            });*/
             if (lastInPoly == true && !inPoly){
                 playerPath.splice(0, playerPath.length);
-                playerPath.push({...player/*, x: player.x - speed.x/2, y:  player.y - speed.y/2*/});
+                playerPath.push(lineCrossPoly(polys[0], [{ x: player.x - speed.x*sc, y:  player.y - speed.y*sc}, {...player}]))
+                //playerPath.push({...player/*, x: player.x - speed.x/2, y:  player.y - speed.y/2*/});
             }
 
             if (!inPoly){
@@ -334,8 +347,10 @@ function init(){
                     if (playerPath.length >=1){
                         //polys.push([...playerPath, {...player}]);
                         const initial = [...polys[0]];
-                        const pol0 = combinePoly(polys[0], [...playerPath, {...player, x: player.x - speed.x/2, y:  player.y - speed.y/2}]);
-                        const pol1 = combinePoly2(polys[0], [...playerPath, {...player, x: player.x - speed.x/2, y:  player.y - speed.y/2}]);
+                        const cross = lineCrossPoly(polys[0], [{ x: player.x - speed.x*sc, y:  player.y - speed.y*sc}, {...player}]);
+                        cross && playerPath.push(cross)
+                        const pol0 = combinePoly(polys[0], [...playerPath]);
+                        const pol1 = combinePoly2(polys[0], [...playerPath]);
                         console.log( polyArea(pol0), polyArea(pol1))
                         polys[0] = polyArea(pol0)> polyArea(pol1)? pol0 : pol1;
                         console.log('s = ', polyArea(polys[0]));
@@ -347,6 +362,7 @@ function init(){
             }
 
             lastInPoly = inPoly;
+            lastPointInPoly = {...player};
 
             ctx.fillStyle = '#f00';
             ctx.fillRect(player.x-2, player.y-2, 4, 4);

@@ -3,6 +3,10 @@ import { combinePoly, combinePoly2 } from './combines.js';
 import { solveCutted } from './linear.js';
 
 function init(){
+    const ba = document.querySelector('.joystick_btn_a');
+    const bw = document.querySelector('.joystick_btn_w');
+    const bs = document.querySelector('.joystick_btn_s');
+    const bd = document.querySelector('.joystick_btn_d');
     const areaOutput = document.querySelector('.area-output');
     const canvas = document.querySelector('.canvas');
     canvas.width = 200;
@@ -35,6 +39,30 @@ function init(){
         disPlayerPath.push({...player});
     }
 
+    ba.onclick =()=>{
+        if (speed.x != 1){
+            speed = {x:-1, y:0};
+            changeDir();
+        }
+    }
+    bw.onclick =()=>{
+        if (speed.y != 1){
+            speed = {x:0, y:-1};
+            changeDir();
+        }
+    }
+    bs.onclick =()=>{
+        if (speed.y != -1){
+            speed = {x:0, y:1};
+            changeDir();
+        }
+    }
+    bd.onclick =()=>{
+        if (speed.x != -1){
+            speed = {x:1, y:0};
+            changeDir();
+        }
+    }
     window.onkeydown=(e=>{
         console.log(e.code);
         if (e.code == 'KeyA' || e.code == 'ArrowLeft'){

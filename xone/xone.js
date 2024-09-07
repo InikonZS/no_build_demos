@@ -147,7 +147,7 @@ function init(){
 
             let inPoly = insidePoly(polys[0], player);// && !insidePoly(dispolys[0], player, true);
              //!insidePoly(dispolys[0], player);
-            let currentDispoly = dispolys.findIndex((poly) => insidePoly(poly, player));
+            let currentDispoly = dispolys.findIndex((poly) => insidePoly(poly, player, true));
             let indispoly = currentDispoly == -1;
             console.log('disp', currentDispoly)
             /*let inPoly =false;

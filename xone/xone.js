@@ -1,5 +1,6 @@
 import {getAngle, isVerticalline, crossLine, lineCrossPoly, polyArea, insidePoly} from './utils.js';
 import { combinePoly, combinePoly2 } from './combines.js';
+import { solveCutted } from './linear.js';
 
 function init(){
     const areaOutput = document.querySelector('.area-output');
@@ -84,7 +85,7 @@ function init(){
         requestAnimationFrame(()=>{
             ctx.fillStyle = '#000';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-            const sc = 2;
+            const sc = 0.5;
             if (player.x+speed.x*sc >=0  && player.x+speed.x*sc <=canvas.width){
                 player.x += speed.x*sc;
             }
@@ -262,7 +263,36 @@ function init(){
                 if (enemy.y < 0 || enemy.y>canvas.height){
                     enemySpeed.y = -enemySpeed.y;
                 }
-            })
+            });
+            let isEnemyCrossed = false;
+            enemies.forEach(enemyObj=>{
+                const enemy = enemyObj.pos;
+                const enemySpeed = enemyObj.speed;
+                const enPos = {x: enemy.x + enemySpeed.x * 2, y: enemy.y + enemySpeed.y * 2}
+                const enPos1 = {x: enemy.x - enemySpeed.x * 2, y: enemy.y - enemySpeed.y * 2}
+                disPlayerPath.forEach((it, i)=>{
+                    if (i== disPlayerPath.length-1){
+                        const crossPoint = solveCutted(it, player, enPos, enPos1);
+                        if (crossPoint) 
+                            {console.log(crossPoint);
+                        isEnemyCrossed = true;
+                            }
+                        return
+                    };
+                    const crossPoint = solveCutted(it, disPlayerPath[i+1], enPos, enPos1);
+                    if (crossPoint){
+                    console.log(crossPoint);
+                    isEnemyCrossed =true;
+                    }
+                });
+            });
+            if (isEnemyCrossed){
+                player.x = 100;
+                player.y = 20;
+                speed.x =0;
+                speed.y =0;
+                disPlayerPath.splice(0, disPlayerPath.length);
+            }
             render();
         })
     }

@@ -233,15 +233,17 @@ function combinePoly2(a, b){
     return newLine;
 }
 
-function insidePoly(poly, a){
+function insidePoly(poly, a, ib){
     let inPoly = false;
         let sumAng = 0;
         poly.forEach((it, i)=>{
             const newAng = getAngle(it, poly[((i+1)) %poly.length], a)
             sumAng += Number.isNaN(newAng) ? 0: newAng;
         });
-        //if (Math.abs(Math.abs(sumAng) - Math.PI * 2) < 0.0000001){
-        if (Math.abs(Math.abs(sumAng)) > 0.0000001){
+        if (ib &&Math.abs(Math.abs(sumAng) - Math.PI * 2) < 0.0000001){
+            inPoly =true;
+        }
+        if (!ib &&Math.abs(Math.abs(sumAng)) > 0.0000001){
             inPoly = true;
         }
        // console.log(sumAng);
@@ -256,18 +258,21 @@ function init(){
     canvas.width = 200;
     canvas.height = 200;
     const ctx = canvas.getContext('2d');
-    const player = {x:100, y:100};
+    const player = {x:100, y:145};
     let speed = {x:0, y:0};
 
     const enemy = {x:160, y:150};
     let enemySpeed = {x:5, y:5};
 
     const playerPath = [{...player}];
+    const disPlayerPath = [];
 
-    const polys = [[{x:70, y:120}, {x:70, y:80}, {x:130, y:80},  {x:130, y:120}]];
+    const polys = [[{x:40, y:170}, {x:40, y:80}, {x:150, y:80},  {x:150, y:170}]];
+    const dispolys = [[{x:70, y:120}, {x:70, y:90}, {x:130, y:90},  {x:130, y:120}]];
 
     const changeDir = ()=>{
         playerPath.push({...player});
+        disPlayerPath.push({...player});
     }
 
     window.onkeydown=(e=>{
@@ -291,6 +296,7 @@ function init(){
     });
 
     let lastInPoly = false;
+    let lastInDispoly = false;
     let lastPointInPoly;
     const render = ()=>{
         requestAnimationFrame(()=>{
@@ -316,7 +322,20 @@ function init(){
                 ctx.stroke();
             });
 
-            let inPoly = insidePoly(polys[0], player);
+            dispolys.forEach(poly=>{
+                ctx.strokeStyle = '#f90';
+                ctx.fillStyle = '#222';
+                ctx.beginPath();
+                poly.forEach((it, i)=>{
+                    ctx[i==0?'moveTo':'lineTo'](it.x, it.y);
+                });
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+            });
+
+            let inPoly = insidePoly(polys[0], player);// && !insidePoly(dispolys[0], player, true);
+            let indispoly = !insidePoly(dispolys[0], player);
             /*let inPoly =false;
             polys.forEach(poly=>{
                 let sumAng = 0;
@@ -330,7 +349,18 @@ function init(){
             });*/
             if (lastInPoly == true && !inPoly){
                 playerPath.splice(0, playerPath.length);
-                playerPath.push(lineCrossPoly(polys[0], [{ x: player.x - speed.x*sc, y:  player.y - speed.y*sc}, {...player}]))
+                const cross = lineCrossPoly(polys[0], [{ x: player.x - speed.x*sc, y:  player.y - speed.y*sc}, {...player}]);
+                if (cross){
+                playerPath.push(cross)
+                }
+                //playerPath.push({...player/*, x: player.x - speed.x/2, y:  player.y - speed.y/2*/});
+            }
+            if (lastInDispoly == true && !indispoly){
+                disPlayerPath.splice(0, disPlayerPath.length);
+                const cross = lineCrossPoly(dispolys[0], [{ x: player.x - speed.x*sc, y:  player.y - speed.y*sc}, {...player}]);
+                if (cross){
+                    disPlayerPath.push(cross)
+                }
                 //playerPath.push({...player/*, x: player.x - speed.x/2, y:  player.y - speed.y/2*/});
             }
 
@@ -361,7 +391,35 @@ function init(){
                 }
             }
 
+            if (!indispoly){
+                ctx.strokeStyle = '#9f9';
+                ctx.beginPath();
+                disPlayerPath.forEach((it, i)=>{
+                    ctx[i==0?'moveTo':'lineTo'](it.x, it.y);
+                });
+                ctx.lineTo(player.x, player.y)
+                ctx.stroke();
+            } else {
+                if (lastInDispoly == false){
+                    if (disPlayerPath.length >=1){
+                        //polys.push([...playerPath, {...player}]);
+                        const initial = [...dispolys[0]];
+                        const cross = lineCrossPoly(dispolys[0], [{ x: player.x - speed.x*sc, y:  player.y - speed.y*sc}, {...player}]);
+                        cross && disPlayerPath.push(cross)
+                        const pol0 = combinePoly(dispolys[0], [...disPlayerPath]);
+                        const pol1 = combinePoly2(dispolys[0], [...disPlayerPath]);
+                        console.log( polyArea(pol0), polyArea(pol1))
+                        dispolys[0] = polyArea(pol0)> polyArea(pol1)? pol0 : pol1; //> and < for  different sides cut, check balls
+                        console.log('s = ', polyArea(dispolys[0]));
+                        const _notInPoly = initial.find(p => false == insidePoly(dispolys[0], p));
+                        _notInPoly && console.log('shit')
+                    }
+                    disPlayerPath.splice(0, disPlayerPath.length);
+                }
+            }
+
             lastInPoly = inPoly;
+            lastInDispoly = indispoly;
             lastPointInPoly = {...player};
 
             ctx.fillStyle = '#f00';
@@ -380,6 +438,7 @@ function init(){
                     enemySpeed.y = -enemySpeed.y;
                 }
             });
+            
             enemy.x += enemySpeed.x / 2;
             enemy.y += enemySpeed.y / 2;
             if (enemy.x < 0 || enemy.x>canvas.width){

@@ -286,6 +286,18 @@ function init(){
                     }
                 });
             });
+            disPlayerPath.forEach((it, i)=>{
+                if (i>= disPlayerPath.length-2){
+                    return;
+                };
+                const pl1 = {x: player.x + speed.x * 2, y: player.y + speed.y * 2}
+                const pl2 = {x: player.x - speed.x * 2, y: player.y - speed.y * 2}
+                const crossPoint = solveCutted(it, disPlayerPath[i+1], pl1, pl2);
+                    if (crossPoint){
+                    console.log(crossPoint);
+                    isEnemyCrossed =true;
+                }
+            })
             if (isEnemyCrossed){
                 player.x = 100;
                 player.y = 20;

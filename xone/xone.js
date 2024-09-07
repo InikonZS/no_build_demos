@@ -26,25 +26,34 @@ function init(){
     window.onkeydown=(e=>{
         console.log(e.code);
         if (e.code == 'KeyA' || e.code == 'ArrowLeft'){
-            speed = {x:-1, y:0};
-            changeDir();
+            if (speed.x != 1){
+                speed = {x:-1, y:0};
+                changeDir();
+            }
         }
         if (e.code == 'KeyW' || e.code == 'ArrowUp'){
-            speed = {x:0, y:-1};
-            changeDir();
+            if (speed.y != 1){
+                speed = {x:0, y:-1};
+                changeDir();
+            }
         }
         if (e.code == 'KeyS' || e.code == 'ArrowDown'){
-            speed = {x:0, y:1};
-            changeDir();
+            if (speed.y != -1){
+                speed = {x:0, y:1};
+                changeDir();
+            }
         }
         if (e.code == 'KeyD' || e.code == 'ArrowRight'){
-            speed = {x:1, y:0};
-            changeDir();
+            if (speed.x != -1){
+                speed = {x:1, y:0};
+                changeDir();
+            }
         }
     });
 
     let lastInPoly = false;
     let lastInDispoly = false;
+    let lastInDispolyIndex = -1;
     let lastPointInPoly;
     const render = ()=>{
         requestAnimationFrame(()=>{
@@ -83,7 +92,10 @@ function init(){
             });
 
             let inPoly = insidePoly(polys[0], player);// && !insidePoly(dispolys[0], player, true);
-            let indispoly = !insidePoly(dispolys[0], player);
+             //!insidePoly(dispolys[0], player);
+            let currentDispoly = dispolys.findIndex((poly) => insidePoly(poly, player));
+            let indispoly = currentDispoly == -1;
+            console.log('disp', currentDispoly)
             /*let inPoly =false;
             polys.forEach(poly=>{
                 let sumAng = 0;
@@ -105,7 +117,7 @@ function init(){
             }
             if (lastInDispoly == true && !indispoly){
                 disPlayerPath.splice(0, disPlayerPath.length);
-                const cross = lineCrossPoly(dispolys[0], [{ x: player.x - speed.x*sc, y:  player.y - speed.y*sc}, {...player}]);
+                const cross = lineCrossPoly(dispolys[currentDispoly], [{ x: player.x - speed.x*sc, y:  player.y - speed.y*sc}, {...player}]);
                 if (cross){
                     disPlayerPath.push(cross)
                 }
@@ -151,15 +163,16 @@ function init(){
                 if (lastInDispoly == false){
                     if (disPlayerPath.length >=1){
                         //polys.push([...playerPath, {...player}]);
-                        const initial = [...dispolys[0]];
-                        const cross = lineCrossPoly(dispolys[0], [{ x: player.x - speed.x*sc, y:  player.y - speed.y*sc}, {...player}]);
+                        const currentDispoly = lastInDispolyIndex;
+                        const initial = [...dispolys[currentDispoly]];
+                        const cross = lineCrossPoly(dispolys[currentDispoly], [{ x: player.x - speed.x*sc, y:  player.y - speed.y*sc}, {...player}]);
                         cross && disPlayerPath.push(cross)
-                        const pol0 = combinePoly(dispolys[0], [...disPlayerPath]);
-                        const pol1 = combinePoly2(dispolys[0], [...disPlayerPath]);
+                        const pol0 = combinePoly(dispolys[currentDispoly], [...disPlayerPath]);
+                        const pol1 = combinePoly2(dispolys[currentDispoly], [...disPlayerPath]);
                         console.log( polyArea(pol0), polyArea(pol1))
-                        dispolys[0] = polyArea(pol0)> polyArea(pol1)? pol0 : pol1; //> and < for  different sides cut, check balls
-                        console.log('s = ', polyArea(dispolys[0]));
-                        const _notInPoly = initial.find(p => false == insidePoly(dispolys[0], p));
+                        dispolys[currentDispoly] = polyArea(pol0)> polyArea(pol1)? pol0 : pol1; //> and < for  different sides cut, check balls
+                        console.log('s = ', polyArea(dispolys[currentDispoly]));
+                        const _notInPoly = initial.find(p => false == insidePoly(dispolys[currentDispoly], p));
                         _notInPoly && console.log('shit')
                     }
                     disPlayerPath.splice(0, disPlayerPath.length);
@@ -168,6 +181,7 @@ function init(){
 
             lastInPoly = inPoly;
             lastInDispoly = indispoly;
+            lastInDispolyIndex = currentDispoly;
             lastPointInPoly = {...player};
 
             ctx.fillStyle = '#f00';

@@ -141,7 +141,7 @@ function init(){
                 }
                 //playerPath.push({...player/*, x: player.x - speed.x/2, y:  player.y - speed.y/2*/});
             }
-            if (lastInDispoly == true && !indispoly){
+            if ((lastInDispoly == true && !indispoly)){
                 disPlayerPath.splice(0, disPlayerPath.length);
                 const cross = lineCrossPoly(dispolys[currentDispoly], [{ x: player.x - speed.x*sc, y:  player.y - speed.y*sc}, {...player}]);
                 if (cross){
@@ -186,42 +186,49 @@ function init(){
                 });
                 ctx.lineTo(player.x, player.y)
                 ctx.stroke();
-            } else {
-                if (lastInDispoly == false){
-                    if (disPlayerPath.length >=1){
-                        //polys.push([...playerPath, {...player}]);
-                        const currentDispoly = lastInDispolyIndex;
-                        const initial = [...dispolys[currentDispoly]];
-                        const cross = lineCrossPoly(dispolys[currentDispoly], [{ x: player.x - speed.x*sc, y:  player.y - speed.y*sc}, {...player}]);
-                        cross && disPlayerPath.push(cross)
-                        const pol0 = combinePoly(dispolys[currentDispoly], [...disPlayerPath]);
-                        const pol1 = combinePoly2(dispolys[currentDispoly], [...disPlayerPath]);
-                        console.log( polyArea(pol0), polyArea(pol1));
-                        const isEnemyIn0 = !!enemies.find(enemy => insidePoly(pol0, enemy.pos));
-                        const isEnemyIn1 = !!enemies.find(enemy => insidePoly(pol1, enemy.pos));
-                        if (isEnemyIn0 && isEnemyIn1){
-                            dispolys[currentDispoly] = pol0;
-                            dispolys.push(pol1);
-                        } else if (isEnemyIn0) {
-                            dispolys[currentDispoly] = pol0;
-                        } else {
-                            dispolys[currentDispoly] = pol1;
-                        }
-                        /*const split = true;
-                        if (split){
-                            dispolys[currentDispoly] = pol0;
-                            dispolys.push(pol1);
-                        } else {
-                            dispolys[currentDispoly] = polyArea(pol0)> polyArea(pol1)? pol0 : pol1;
-                        }*/ //> and < for  different sides cut, check balls
-                        console.log('s = ', polyArea(dispolys[currentDispoly]));
-                        sumArea = calcArea();
-                        const _notInPoly = initial.find(p => false == insidePoly(dispolys[currentDispoly], p));
-                        _notInPoly && console.log('shit')
-                    }
-                    disPlayerPath.splice(0, disPlayerPath.length);
-                }
             }
+
+            if ((indispoly&&lastInDispoly == false) || ( currentDispoly!=-1 && lastInDispolyIndex!=-1  && currentDispoly != lastInDispolyIndex)){
+                if (disPlayerPath.length >=1){
+                    //polys.push([...playerPath, {...player}]);
+                    const currentDispoly = lastInDispolyIndex;
+                    const initial = [...dispolys[currentDispoly]];
+                    const cross = lineCrossPoly(dispolys[currentDispoly], [{ x: player.x - speed.x*sc, y:  player.y - speed.y*sc}, {...player}]);
+                    cross && disPlayerPath.push(cross)
+                    const pol0 = combinePoly(dispolys[currentDispoly], [...disPlayerPath]);
+                    const pol1 = combinePoly2(dispolys[currentDispoly], [...disPlayerPath]);
+                    console.log( polyArea(pol0), polyArea(pol1));
+                    const isEnemyIn0 = !!enemies.find(enemy => insidePoly(pol0, enemy.pos));
+                    const isEnemyIn1 = !!enemies.find(enemy => insidePoly(pol1, enemy.pos));
+                    if (isEnemyIn0 && isEnemyIn1){
+                        dispolys[currentDispoly] = pol0;
+                        dispolys.push(pol1);
+                    } else if (isEnemyIn0) {
+                        dispolys[currentDispoly] = pol0;
+                    } else {
+                        dispolys[currentDispoly] = pol1;
+                    }
+                    /*const split = true;
+                    if (split){
+                        dispolys[currentDispoly] = pol0;
+                        dispolys.push(pol1);
+                    } else {
+                        dispolys[currentDispoly] = polyArea(pol0)> polyArea(pol1)? pol0 : pol1;
+                    }*/ //> and < for  different sides cut, check balls
+                    console.log('s = ', polyArea(dispolys[currentDispoly]));
+                    sumArea = calcArea();
+                    const _notInPoly = initial.find(p => false == insidePoly(dispolys[currentDispoly], p));
+                    _notInPoly && console.log('shit')
+                }
+                disPlayerPath.splice(0, disPlayerPath.length);
+            }
+
+            if (( currentDispoly!=-1 && lastInDispolyIndex!=-1  && currentDispoly != lastInDispolyIndex)){
+                indispoly = false;
+                const cross = lineCrossPoly(dispolys[currentDispoly], [{ x: player.x - speed.x*sc, y:  player.y - speed.y*sc}, {...player}]);
+                cross && disPlayerPath.push(cross)
+            }
+            
 
             lastInPoly = inPoly;
             lastInDispoly = indispoly;

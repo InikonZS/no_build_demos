@@ -1,3 +1,5 @@
+import {getAngle, isVerticalline, crossLine, lineCrossPoly, polyArea, insidePoly} from './utils.js';
+
 export function combinePoly(a, b){
     const newLine = [];
     const newLine1 = [];

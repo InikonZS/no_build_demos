@@ -9,14 +9,14 @@ function init(){
     const player = {x:100, y:145};
     let speed = {x:0, y:0};
 
-    const enemy = {x:160, y:150};
+    const enemy = {x:170, y:150};
     let enemySpeed = {x:5, y:5};
 
     const playerPath = [{...player}];
     const disPlayerPath = [];
 
-    const polys = [[{x:40, y:170}, {x:40, y:80}, {x:150, y:80},  {x:150, y:170}]];
-    const dispolys = [[{x:70, y:120}, {x:70, y:90}, {x:130, y:90},  {x:130, y:120}]];
+    const polys = [[{x:40, y:170}, {x:40, y:80}, {x:170, y:80},  {x:170, y:170}]];
+    const dispolys = [[{x:70, y:120}, {x:70, y:90}, {x:130, y:90},  {x:130, y:120}], [{x:140, y:120}, {x:140, y:90}, {x:160, y:90},  {x:160, y:120}]];
 
     const changeDir = ()=>{
         playerPath.push({...player});
@@ -33,11 +33,11 @@ function init(){
             speed = {x:0, y:-1};
             changeDir();
         }
-        if (e.code == 'KeyS' || e.code == 'ArrowRight'){
+        if (e.code == 'KeyS' || e.code == 'ArrowDown'){
             speed = {x:0, y:1};
             changeDir();
         }
-        if (e.code == 'KeyD' || e.code == 'ArrowDown'){
+        if (e.code == 'KeyD' || e.code == 'ArrowRight'){
             speed = {x:1, y:0};
             changeDir();
         }

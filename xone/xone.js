@@ -7,6 +7,7 @@ function init(){
     const bw = document.querySelector('.joystick_btn_w');
     const bs = document.querySelector('.joystick_btn_s');
     const bd = document.querySelector('.joystick_btn_d');
+    const wrapper = document.querySelector('.xone-wrapper');
     const areaOutput = document.querySelector('.area-output');
     const canvas = document.querySelector('.canvas');
     canvas.width = 200;
@@ -104,20 +105,34 @@ function init(){
         return area;
     }
 
+    let gameSize = {x: 200, y: 200};
+    let canvasScaler = 1;
+    const resize = ()=>{
+        const minSize = Math.min(wrapper.clientWidth, wrapper.clientHeight);;
+        canvasScaler = minSize / gameSize.x;
+        canvas.width = minSize
+        canvas.height = minSize
+    }
+
+    window.addEventListener('resize', resize);
     let lastInPoly = false;
     let lastInDispoly = false;
     let lastInDispolyIndex = -1;
     let lastPointInPoly;
     let sumArea = calcArea();
+
+    resize();
     const render = ()=>{
         requestAnimationFrame(()=>{
+            ctx.lineWidth = canvasScaler;
+
             ctx.fillStyle = '#000';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             const sc = 0.5;
-            if (player.x+speed.x*sc >=0  && player.x+speed.x*sc <=canvas.width){
+            if (player.x+speed.x*sc >=0  && player.x+speed.x*sc <=gameSize.x){
                 player.x += speed.x*sc;
             }
-            if (player.y+speed.y*sc >=0  && player.y+speed.y*sc <=canvas.height){
+            if (player.y+speed.y*sc >=0  && player.y+speed.y*sc <=gameSize.y){
                 player.y += speed.y *sc;
             }
 
@@ -126,7 +141,7 @@ function init(){
                 ctx.fillStyle = '#c63';
                 ctx.beginPath();
                 poly.forEach((it, i)=>{
-                    ctx[i==0?'moveTo':'lineTo'](it.x, it.y);
+                    ctx[i==0?'moveTo':'lineTo'](it.x* canvasScaler, it.y* canvasScaler);
                 });
                 ctx.closePath();
                 ctx.fill();
@@ -138,7 +153,7 @@ function init(){
                 ctx.fillStyle = '#222';
                 ctx.beginPath();
                 poly.forEach((it, i)=>{
-                    ctx[i==0?'moveTo':'lineTo'](it.x, it.y);
+                    ctx[i==0?'moveTo':'lineTo'](it.x* canvasScaler, it.y* canvasScaler);
                 });
                 ctx.closePath();
                 ctx.fill();
@@ -182,9 +197,9 @@ function init(){
                 ctx.strokeStyle = '#999';
                 ctx.beginPath();
                 playerPath.forEach((it, i)=>{
-                    ctx[i==0?'moveTo':'lineTo'](it.x, it.y);
+                    ctx[i==0?'moveTo':'lineTo'](it.x* canvasScaler, it.y* canvasScaler);
                 });
-                ctx.lineTo(player.x, player.y)
+                ctx.lineTo(player.x * canvasScaler, player.y * canvasScaler)
                 ctx.stroke();
             } else {
                 if (lastInPoly == false){
@@ -210,9 +225,9 @@ function init(){
                 ctx.strokeStyle = '#9f9';
                 ctx.beginPath();
                 disPlayerPath.forEach((it, i)=>{
-                    ctx[i==0?'moveTo':'lineTo'](it.x, it.y);
+                    ctx[i==0?'moveTo':'lineTo'](it.x* canvasScaler, it.y* canvasScaler);
                 });
-                ctx.lineTo(player.x, player.y)
+                ctx.lineTo(player.x*canvasScaler, player.y*canvasScaler)
                 ctx.stroke();
             }
 
@@ -264,12 +279,12 @@ function init(){
             lastPointInPoly = {...player};
 
             ctx.fillStyle = '#f00';
-            ctx.fillRect(player.x-2, player.y-2, 4, 4);
+            ctx.fillRect((player.x-2)* canvasScaler, (player.y-2)* canvasScaler, 4* canvasScaler, 4* canvasScaler);
     
             enemies.forEach((enemyObj)=>{
                 const enemy = enemyObj.pos; 
                 ctx.fillStyle = '#ff0';
-                ctx.fillRect(enemy.x-2, enemy.y-2, 4, 4);
+                ctx.fillRect((enemy.x-2)* canvasScaler, (enemy.y-2)* canvasScaler, 4* canvasScaler, 4* canvasScaler);
             })
            
             enemies.forEach((enemyObj)=>{
@@ -292,10 +307,10 @@ function init(){
                 const enemySpeed = enemyObj.speed;
                 enemy.x += enemySpeed.x / 2;
                 enemy.y += enemySpeed.y / 2;
-                if (enemy.x < 0 || enemy.x>canvas.width){
+                if (enemy.x < 0 || enemy.x>gameSize.x){
                     enemySpeed.x = -enemySpeed.x;
                 }
-                if (enemy.y < 0 || enemy.y>canvas.height){
+                if (enemy.y < 0 || enemy.y>gameSize.y){
                     enemySpeed.y = -enemySpeed.y;
                 }
             });

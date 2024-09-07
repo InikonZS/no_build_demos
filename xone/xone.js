@@ -2,21 +2,32 @@ import {getAngle, isVerticalline, crossLine, lineCrossPoly, polyArea, insidePoly
 import { combinePoly, combinePoly2 } from './combines.js';
 
 function init(){
+    const areaOutput = document.querySelector('.area-output');
     const canvas = document.querySelector('.canvas');
     canvas.width = 200;
     canvas.height = 200;
     const ctx = canvas.getContext('2d');
-    const player = {x:100, y:145};
+    //const player = {x:100, y:145};
+    const player = {x:100, y:20};
     let speed = {x:0, y:0};
 
-    const enemy = {x:170, y:150};
-    let enemySpeed = {x:5, y:5};
+    const enemies = [{
+        pos: {x:120, y:100},
+        speed: {x:0.5, y:0.5}
+    }, {
+        pos: {x:110, y:100},
+        speed: {x:-0.5, y:0.5}
+    }]
+    const enemy = {x:120, y:100};
+    let enemySpeed = {x:2, y:2};
 
     const playerPath = [{...player}];
     const disPlayerPath = [];
 
-    const polys = [[{x:40, y:170}, {x:40, y:80}, {x:170, y:80},  {x:170, y:170}]];
-    const dispolys = [[{x:70, y:120}, {x:70, y:90}, {x:130, y:90},  {x:130, y:120}], [{x:140, y:120}, {x:140, y:90}, {x:160, y:90},  {x:160, y:120}]];
+    //const polys = [[{x:40, y:170}, {x:40, y:80}, {x:170, y:80},  {x:170, y:170}]];
+    //const dispolys = [[{x:70, y:120}, {x:70, y:90}, {x:130, y:90},  {x:130, y:120}], [{x:140, y:120}, {x:140, y:90}, {x:160, y:90},  {x:160, y:120}]];
+    const polys = [[{x:0, y:canvas.height}, {x:canvas.width, y:canvas.height}, {x:canvas.width, y:0},  {x:0, y:0}]];
+    const dispolys = [[{x:40, y:canvas.height -40}, {x:canvas.width -40, y:canvas.height-40}, {x:canvas.width-40, y:40},  {x:40, y:40}]];
 
     const changeDir = ()=>{
         playerPath.push({...player});
@@ -51,10 +62,24 @@ function init(){
         }
     });
 
+    let initArea = 0;
+    polys.forEach(poly => initArea+= polyArea(poly));
+    dispolys.forEach(poly => initArea-= polyArea(poly));
+    let targetArea = 0;
+    dispolys.forEach(poly => targetArea+= polyArea(poly));
+    const calcArea = ()=>{
+        let area = 0;
+        polys.forEach(poly => area+= polyArea(poly));
+        dispolys.forEach(poly => area-= polyArea(poly));
+        areaOutput.textContent = Math.floor((area - initArea) / targetArea * 100);
+        return area;
+    }
+
     let lastInPoly = false;
     let lastInDispoly = false;
     let lastInDispolyIndex = -1;
     let lastPointInPoly;
+    let sumArea = calcArea();
     const render = ()=>{
         requestAnimationFrame(()=>{
             ctx.fillStyle = '#000';
@@ -144,6 +169,7 @@ function init(){
                         console.log( polyArea(pol0), polyArea(pol1))
                         polys[0] = polyArea(pol0)> polyArea(pol1)? pol0 : pol1;
                         console.log('s = ', polyArea(polys[0]));
+                        sumArea = calcArea();
                         const _notInPoly = initial.find(p => false == insidePoly(polys[0], p));
                         _notInPoly && console.log('shit')
                     }
@@ -169,9 +195,26 @@ function init(){
                         cross && disPlayerPath.push(cross)
                         const pol0 = combinePoly(dispolys[currentDispoly], [...disPlayerPath]);
                         const pol1 = combinePoly2(dispolys[currentDispoly], [...disPlayerPath]);
-                        console.log( polyArea(pol0), polyArea(pol1))
-                        dispolys[currentDispoly] = polyArea(pol0)> polyArea(pol1)? pol0 : pol1; //> and < for  different sides cut, check balls
+                        console.log( polyArea(pol0), polyArea(pol1));
+                        const isEnemyIn0 = !!enemies.find(enemy => insidePoly(pol0, enemy.pos));
+                        const isEnemyIn1 = !!enemies.find(enemy => insidePoly(pol1, enemy.pos));
+                        if (isEnemyIn0 && isEnemyIn1){
+                            dispolys[currentDispoly] = pol0;
+                            dispolys.push(pol1);
+                        } else if (isEnemyIn0) {
+                            dispolys[currentDispoly] = pol0;
+                        } else {
+                            dispolys[currentDispoly] = pol1;
+                        }
+                        /*const split = true;
+                        if (split){
+                            dispolys[currentDispoly] = pol0;
+                            dispolys.push(pol1);
+                        } else {
+                            dispolys[currentDispoly] = polyArea(pol0)> polyArea(pol1)? pol0 : pol1;
+                        }*/ //> and < for  different sides cut, check balls
                         console.log('s = ', polyArea(dispolys[currentDispoly]));
+                        sumArea = calcArea();
                         const _notInPoly = initial.find(p => false == insidePoly(dispolys[currentDispoly], p));
                         _notInPoly && console.log('shit')
                     }
@@ -187,28 +230,39 @@ function init(){
             ctx.fillStyle = '#f00';
             ctx.fillRect(player.x-2, player.y-2, 4, 4);
     
-            ctx.fillStyle = '#ff0';
-            ctx.fillRect(enemy.x-2, enemy.y-2, 4, 4);
+            enemies.forEach((enemyObj)=>{
+                const enemy = enemyObj.pos; 
+                ctx.fillStyle = '#ff0';
+                ctx.fillRect(enemy.x-2, enemy.y-2, 4, 4);
+            })
            
-            polys.forEach(poly=>{
-                const inPolyX = insidePoly(poly, {x: enemy.x + enemySpeed.x * 2, y: enemy.y - enemySpeed.y * 2});
-                const inPolyY = insidePoly(poly, {x: enemy.x - enemySpeed.x * 2, y: enemy.y + enemySpeed.y * 2});
-                if (inPolyX){
+            enemies.forEach((enemyObj)=>{
+                const enemy = enemyObj.pos;
+                const enemySpeed = enemyObj.speed;
+                let controlPolyIndex = dispolys.findIndex(poly=>insidePoly(poly, enemy));
+                let inPolyXInd = dispolys.findIndex(poly=>insidePoly(poly, {x: enemy.x + enemySpeed.x * 2, y: enemy.y - enemySpeed.y * 2}));
+                let inPolyYInd = dispolys.findIndex(poly=> insidePoly(poly, {x: enemy.x - enemySpeed.x * 2, y: enemy.y + enemySpeed.y * 2}));
+                    if (inPolyXInd == -1 || inPolyXInd != controlPolyIndex){
+                        enemySpeed.x = -enemySpeed.x;
+                    }
+                    if (inPolyYInd == -1 || inPolyYInd != controlPolyIndex){
+                        enemySpeed.y = -enemySpeed.y;
+                    }
+                
+            })
+            /*polys*/ 
+            enemies.forEach(enemyObj=>{
+                const enemy = enemyObj.pos;
+                const enemySpeed = enemyObj.speed;
+                enemy.x += enemySpeed.x / 2;
+                enemy.y += enemySpeed.y / 2;
+                if (enemy.x < 0 || enemy.x>canvas.width){
                     enemySpeed.x = -enemySpeed.x;
                 }
-                if (inPolyY){
+                if (enemy.y < 0 || enemy.y>canvas.height){
                     enemySpeed.y = -enemySpeed.y;
                 }
-            });
-            
-            enemy.x += enemySpeed.x / 2;
-            enemy.y += enemySpeed.y / 2;
-            if (enemy.x < 0 || enemy.x>canvas.width){
-                enemySpeed.x = -enemySpeed.x;
-            }
-            if (enemy.y < 0 || enemy.y>canvas.height){
-                enemySpeed.y = -enemySpeed.y;
-            }
+            })
             render();
         })
     }

@@ -1,4 +1,4 @@
-[our_page_test_version](https://inikonzs.github.io/no_build_demos/index_page.html)
+[our_page_test_version](https://inikonzs.github.io/no_build_demos/index.html)
 
 [space_cards](https://inikonzs.github.io/no_build_demos/space_cards/index.html)
 

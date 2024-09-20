@@ -104,6 +104,50 @@ class PhysBlock{
     }
 }
 
+class PhysRope{
+    constructor(startPos, length, count){
+        this.points = new Array(count).fill(0).map((it,i)=>{
+            const point = new PhysPoint();
+            point.pos = {
+                x: startPos.x,
+                y: startPos.y + i * length,
+            }
+            return point;
+        });
+        this.points[0].mass =9999999;
+
+        this.joints = [];
+        this.points.forEach((it, i)=>{
+            const close = this.points[i+1];
+            if (!close){
+                return;
+            }
+            const joint = new PhysJoint();
+            joint.strength = 1;
+            joint.a = it;
+            joint.b = close;
+            joint.targetLength = Math.hypot(it.pos.x - close.pos.x, it.pos.y - close.pos.y);
+            this.joints.push(joint);
+    
+        });
+    }
+
+    step(){
+        this.points.forEach((it, i)=>{
+            if (i!=0){
+            it.vel.y+=0.0001;
+            }
+        });
+        this.joints.forEach(it=>it.step());
+        this.points.forEach(it=>it.step());
+    }
+
+    render(ctx){
+        this.joints.forEach(it=>it.render(ctx));
+        this.points.forEach(it=>it.render(ctx));
+    }
+}
+
 function init(){
     const canvas= document.createElement('canvas');
     canvas.width = 700;
@@ -120,6 +164,14 @@ function init(){
         //a.pos.x+=10;
         //a.pos.y = Math.random()*60 + 10;
         ms.points.forEach(it=>{
+            const dist = Math.hypot(it.pos.x - e.offsetX, it.pos.y - e.offsetY);
+            it.vel.x+=Math.sign(it.pos.x - e.offsetX)*Math.min(10/(dist*dist), 0.1);
+            it.vel.y+=Math.sign(it.pos.y - e.offsetY)*Math.min(10/(dist*dist), 0.1);
+        });
+        rp.points.forEach((it, i)=>{
+            if (i==0){
+                return;
+            }
             const dist = Math.hypot(it.pos.x - e.offsetX, it.pos.y - e.offsetY);
             it.vel.x+=Math.sign(it.pos.x - e.offsetX)*Math.min(10/(dist*dist), 0.1);
             it.vel.y+=Math.sign(it.pos.y - e.offsetY)*Math.min(10/(dist*dist), 0.1);
@@ -152,6 +204,7 @@ function init(){
     joint2.targetLength = 55;
 
     const ms = new PhysBlock();
+    const rp = new PhysRope({x:300, y: 20}, 10, 30);
 
     const joint3 = new PhysJoint();
     
@@ -159,12 +212,19 @@ function init(){
     joint3.b = ms.points[0];
     joint3.targetLength = 55;
 
+    const joint4 = new PhysJoint();
+    
+    joint4.a = rp.points[rp.points.length-1];
+    joint4.b = ms.points[4];
+    joint4.targetLength = 15;
+
 
     const calcStep =()=>{
         joint.step();
         joint1.step();
         joint2.step();
         joint3.step();
+        joint4.step();
         a.step();
         b.step();
         c.step();
@@ -173,6 +233,7 @@ function init(){
         c.vel.y+=0.0001;
         d.vel.y+=0.0001;
         ms.step();
+        rp.step();
     };
 
     const clear = ()=>{
@@ -189,7 +250,9 @@ function init(){
         joint1.render(ctx);
         joint2.render(ctx);
         joint3.render(ctx);
+        joint4.render(ctx);
         ms.render(ctx);
+        rp.render(ctx);
     }
 
     const render = ()=>{

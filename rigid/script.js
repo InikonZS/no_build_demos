@@ -25,6 +25,7 @@ function init(){
         ],
         new Array(11).fill(0).map((it, i)=> ({x: 100+50* Math.sin(Math.PI*2 / 11 * i), y: 100+i*10* Math.cos(Math.PI*2 / 11 * i)}))
     ];
+
     const objects = _objects.map(obj=>{ 
         return obj.map((it,i)=>{
             const nextPoint = obj[(i+1)%obj.length];
@@ -44,11 +45,18 @@ function init(){
     const calcStep =()=>{
         objects.forEach(obj=>{
             obj.forEach((it, i)=>{
-                it.force.y = it.pos.y>canvas.height? (- it.pos.y + canvas.height)/1 :grav;
+                if (it.pos.y - it.vel.y>canvas.height -10){
+                    it.vel.y = -it.vel.y * 0.993;
+                    it.force.y = -grav;
+                }else {
+                    it.force.y = grav;
+                }
+                //it.force.y = it.pos.y>canvas.height? (- it.pos.y + canvas.height)/1 :grav;
                 //it.force.x = it.force.x *0.51;
                 //it.force.y = it.force.y *0.51;
+                
                 it.vel.x = it.vel.x/kz + (it.force.x);
-                it.vel.y = it.vel.y/kz + (it.force.y );
+                it.vel.y = it.vel.y/kz + (it.force.y);
                 //it.force.x = 0;
                 //it.force.y = 0;
                 //it.pos.x = it.pos.x + it.vel.x;
@@ -72,8 +80,8 @@ function init(){
                     }
                     //it.force.x+=dir.x/ 3000;
                     //it.force.y+=dir.y/ 3000;
-                    it.vel.x = it.vel.x/kz + (it.force.x + dir.x/ 30000);
-                    it.vel.y = it.vel.y/kz + (it.force.y + dir.y /30000);
+                    it.vel.x = it.vel.x/kz + (it.force.x + dir.x/ 3000);
+                    it.vel.y = it.vel.y/kz + (it.force.y + dir.y /3000);
                     //nextPoint.vel.x = nextPoint.vel.x/1.05 + (- dir.x/ 1);
                     //nextPoint.vel.y = nextPoint.vel.y/1.05 + (- dir.y /1); 
                 });

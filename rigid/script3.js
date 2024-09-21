@@ -1,5 +1,18 @@
 import { solveCutted } from "../xone/linear.js";
 
+function rotate(v, ang){
+    return {x: v.x * Math.cos(ang) + v.y * Math.sin(ang), y: v.y * Math.cos(ang) - v.x * Math.sin(ang)}
+}
+
+const getNormal = (v1, v2)=>{
+    const len = Math.hypot(v1.x - v2.x, v1.y - v2.y)
+    const v = {
+        x: (v1.x - v2.x) / len,
+        y: (v1.y - v2.y) / len
+    };
+    return rotate(v, Math.PI / 2);
+}
+
 class SolidPoint{
     constructor(){
         this.pos = {x: 0, y: 0}
@@ -23,6 +36,7 @@ class SolidLine{
     }
 
     step(lines){
+        this.normal = getNormal(this.a.pos, this.b.pos);
         this.sects = [];
         lines.forEach(other =>{
             if (other == this) {
@@ -30,7 +44,10 @@ class SolidLine{
             }
             const pos = solveCutted(this.a.pos, this.b.pos, other.a.pos, other.b.pos);
             if (pos){
-                this.sects.push(pos);
+                this.sects.push({
+                    pos,
+                    obj: other
+                });
             }
         });
     }
@@ -42,14 +59,25 @@ class SolidLine{
         ctx.lineTo(this.b.pos.x, this.b.pos.y);
         ctx.stroke();
 
-        this.sects.forEach(it=>{
+        this.sects.forEach(_it=>{
+            const it = _it.pos;
             ctx.strokeStyle = '#f0f';
             ctx.fillStyle = '#00f';
             ctx.beginPath();
             ctx.ellipse(it.x, it.y, 4, 4, 0 ,0, Math.PI*2);
             ctx.stroke();
             ctx.fillRect(it.x-1, it.y-1, 2, 2);
-        })
+        });
+
+        const centerPoint = {
+            x: (this.a.pos.x + this.b.pos.x) / 2,
+            y: (this.a.pos.y + this.b.pos.y) / 2,
+        }
+        ctx.strokeStyle = '#407';
+        ctx.beginPath();
+        ctx.moveTo(centerPoint.x, centerPoint.y);
+        ctx.lineTo(centerPoint.x + this.normal.x * 10, centerPoint.y + this.normal.y * 10);
+        ctx.stroke();
     }
 }
 
@@ -77,6 +105,40 @@ function init(){
         lines.push(line);
     }
 
+    const player = new SolidLine();
+    player.a = new SolidPoint();
+    player.b = new SolidPoint();
+    player.a.pos = {x: 30, y:30};
+    player.b.pos = {x: 80, y:80};
+
+    let speed = {x: 0, y: 0}
+
+    window.onkeydown=(e=>{
+        console.log(e.code);
+        if (e.code == 'KeyA' || e.code == 'ArrowLeft'){
+           // if (speed.x != 1){
+                speed = {x:-1, y:0};
+            //}
+        }
+        if (e.code == 'KeyW' || e.code == 'ArrowUp'){
+           // if (speed.y != 1){
+                speed = {x:0, y:-1};
+           // }
+        }
+        if (e.code == 'KeyS' || e.code == 'ArrowDown'){
+           // if (speed.y != -1){
+                speed = {x:0, y:1};
+            //    changeDir();
+            //}
+        }
+        if (e.code == 'KeyD' || e.code == 'ArrowRight'){
+           // if (speed.x != -1){
+                speed = {x:1, y:0};
+            //    changeDir();
+            //}
+        }
+    });
+
     const lines = [
         
     ];
@@ -85,6 +147,23 @@ function init(){
         lines.forEach(it=>{
             it.step(lines);
         });
+        const k = 0.05;
+        player.a.pos.x +=speed.x*k;
+        player.a.pos.y +=speed.y*k;
+        player.b.pos.x +=speed.x*k;
+        player.b.pos.y +=speed.y*k;
+        player.step(lines);
+        if (player.sects.length){
+            const norm = player.sects[0].obj.normal
+            const dot = norm.x*speed.x + norm.y*speed.y;
+            const reflected = {
+                x: speed.x - (norm.x * 2 * dot),
+                y: speed.y - (norm.y * 2 * dot),
+            }
+            speed = reflected;
+            //speed.x = speed.x * norm.x + speed.y * norm.y;
+            //speed.y = -speed.x * norm.y + speed.y * norm.x;
+        }
     };
 
     const clear = ()=>{
@@ -94,6 +173,7 @@ function init(){
 
     const draw = ()=>{
         lines.forEach(it=>it.render(ctx));
+        player.render(ctx);
     }
 
     const render = ()=>{

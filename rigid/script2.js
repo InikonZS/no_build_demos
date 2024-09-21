@@ -55,12 +55,12 @@ class PhysJoint{
 }
 
 class PhysBlock{
-    constructor(){
-        this.points = new Array(5 * 5).fill(0).map((it,i)=>{
+    constructor(pw, ph, dw, dh, strength){
+        this.points = new Array(pw * ph).fill(0).map((it,i)=>{
             const point = new PhysPoint();
             point.pos = {
-                x: Math.floor(i % 5) * 35 + 100,
-                y: Math.floor(i / 5) * 35 + 300,
+                x: Math.floor(i % pw) * dw + 100,
+                y: Math.floor(i / pw) * dh + 300,
             }
             return point;
         });
@@ -68,15 +68,15 @@ class PhysBlock{
         this.joints = [];
         this.points.forEach((it, i)=>{
             const pos = {
-                x: Math.floor(i % 5),
-                y: Math.floor(i / 5),
+                x: Math.floor(i % pw),
+                y: Math.floor(i / pw),
             };
 
             const closeList = [
-                pos.y!==4 && this.points[(pos.y+1) * 5 + pos.x],
-                pos.x!==4 && this.points[(pos.y) * 5 + pos.x+1],
-                pos.x!==4 && pos.y!==4 &&this.points[(pos.y+1) * 5 + pos.x+1],
-                pos.x!==0 && pos.y!==4 && this.points[(pos.y+1) * 5 + pos.x-1],
+                pos.y!==(ph-1) && this.points[(pos.y+1) * pw + pos.x],
+                pos.x!==(pw-1) && this.points[(pos.y) * pw + pos.x+1],
+                pos.x!==(pw-1) && pos.y!==(ph-1) &&this.points[(pos.y+1) * pw + pos.x+1],
+                pos.x!==0 && pos.y!==(ph-1) && this.points[(pos.y+1) * pw + pos.x-1],
             ].filter(it=>it);
 
             closeList.forEach(close=>{
@@ -203,7 +203,7 @@ function init(){
     joint2.b = d;
     joint2.targetLength = 55;
 
-    const ms = new PhysBlock();
+    const ms = new PhysBlock(7, 8, 35, 35, 1);
     const rp = new PhysRope({x:300, y: 20}, 10, 30);
 
     const joint3 = new PhysJoint();

@@ -13,6 +13,7 @@ const permutationTable = new Array(1024).fill(0).map(it=>random());
 
 const getPseudoRandomGradientVector = (x, y)=>{
     const r = (((x * 1836311903) ^ (y * 2971215073) + 4807526976) & 1023);
+    //const r = (((x * 1) + (y * 1) + 4807526976) & 3);
     const v = Math.floor(permutationTable[r] * 8);
     return [
        { x: 1, y: 0 },
@@ -160,7 +161,9 @@ const app = ()=>{
         ctx.fillStyle = '#fff';
         ctx.fillRect(0,0,canvas.width, canvas.height);
         Object.values(chunks).forEach(it=>{
-        ctx.drawImage(it.chunk, it.position.x * chunkSize + offset.x, it.position.y * chunkSize +offset.y);
+            ctx.strokeStyle = '#f00';
+            ctx.strokeRect(it.position.x * chunkSize + offset.x, it.position.y * chunkSize +offset.y, chunkSize, chunkSize);
+            ctx.drawImage(it.chunk, it.position.x * chunkSize + offset.x, it.position.y * chunkSize +offset.y);
         })   
     }
     canvas.onmousedown = ()=>{

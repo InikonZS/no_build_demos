@@ -31,8 +31,9 @@ const app = ()=>{
 
     const updateChunks = (playerPos)=>{
         //chunks = [];
-        for (let lod = 0; lod< 3; lod ++){
-        const size = 2 ** lod * 8;
+        const minLod = 8;
+        for (let lod = 0; lod< 4; lod ++){
+        const size = 2 ** lod * minLod;
         const count = lod > 0 ? 8 : 6;
         for (let y = 0; y<count; y++){
             for (let x = 0; x<count; x++){
@@ -82,7 +83,7 @@ const app = ()=>{
     const draw = ()=>{
         ctx.fillStyle = '#ccc';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-        const ch1 = chunks.filter(it=>{
+       /*const ch1 = chunks.filter(it=>{
             return it.size == 8;
         });
         const ch2 = chunks.filter(it=>{
@@ -90,10 +91,56 @@ const app = ()=>{
         });
         const ch3 = chunks.filter(it=>{
             return it.size == 32;
-        });
+        });*/
         //console.l
 
-        const chc2 =[];
+        const splitLod = (lodSmall, lodBig)=>{
+            const resultSmall = [];
+            const resultBig = lodBig.filter(it=>{
+                const filtered = lodSmall.filter(jt=>
+                    jt.pos.x >= it.pos.x && 
+                    jt.pos.y >= it.pos.y && 
+                    jt.pos.x < it.pos.x + it.size && 
+                    jt.pos.y < it.pos.y + it.size
+                );
+                if ( filtered.length == 4){
+                    filtered.forEach(fi=>{
+                    resultSmall.push(fi);  
+                    })
+                    
+                }
+                return filtered.length !=4;
+            });
+            return [resultSmall, resultBig];
+        }
+
+        const filterLods = ()=>{
+            const lods = [64, 32, 16, 8].map(it=>{
+                return chunks.filter(jt=>{
+                    return jt.size == it;
+                });
+            });
+
+            let filtered = [];
+            let prevLod;
+            lods.forEach((lod, i)=>{
+                if (i==0){
+                    return;
+                }
+                if (!prevLod){
+                    prevLod = lods[i - 1];
+                }
+                const [small, big] = splitLod(lods[i], prevLod);
+                prevLod = small;
+                big.forEach(it=>filtered.push(it));
+                if (i == lods.length -1){
+                    small.forEach(it=>filtered.push(it));
+                }
+            });
+            return filtered;
+        }
+
+        /*const chc2 =[];
         const chk = ch3.filter(it=>{
             const f = ch2.filter(jt=>jt.pos.x >= it.pos.x && jt.pos.y >= it.pos.y && jt.pos.x < it.pos.x + it.size && jt.pos.y < it.pos.y + it.size);
             if ( f.length == 4){
@@ -103,9 +150,11 @@ const app = ()=>{
                 
             }
             return f.length !=4;
-        });
+        });*/
+        //const [_lod2, lod3] = splitLod(ch2, ch3);
+        //const [lod1, lod2] = splitLod(ch1, _lod2);
 
-        const chc =[];
+        /*const chc =[];
         const ch = chc2.filter(it=>{
             const f = ch1.filter(jt=>jt.pos.x >= it.pos.x && jt.pos.y >= it.pos.y && jt.pos.x < it.pos.x + it.size && jt.pos.y < it.pos.y + it.size);
             if ( f.length == 4){
@@ -115,8 +164,8 @@ const app = ()=>{
                 
             }
             return f.length !=4;
-        });
-        [...ch,...chc, ...chk].forEach(chunk=>{
+        });*/
+        /*[...ch,...chc, ...chk]*//*[...lod1, ...lod2, ...lod3]*/ filterLods().forEach(chunk=>{
             ctx.strokeStyle = '#000';
             ctx.strokeRect(
                 chunk.pos.x + canvas.width /2, 

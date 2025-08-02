@@ -34,7 +34,7 @@ const app = ()=>{
         const minLod = 8;
         for (let lod = 0; lod< 4; lod ++){
         const size = 2 ** lod * minLod;
-        const count = lod > 0 ? 8 : 6;
+        const count = lod > 0 ? 12 : 8;
         for (let y = 0; y<count; y++){
             for (let x = 0; x<count; x++){
                 const newPos ={
@@ -50,7 +50,7 @@ const app = ()=>{
                 }
             }
         }
-        chunks = chunks.filter(it=> it.size != size || Math.hypot(it.pos.x - playerPos.x , it.pos.y - playerPos.y) < size * count *1.4);
+        chunks = chunks.filter(it=> it.size != size || Math.hypot(it.pos.x - playerPos.x , it.pos.y - playerPos.y) < size * count *1.02);
         }
         /*
          {const size = 16;
@@ -165,7 +165,8 @@ const app = ()=>{
             }
             return f.length !=4;
         });*/
-        /*[...ch,...chc, ...chk]*//*[...lod1, ...lod2, ...lod3]*/ filterLods().forEach(chunk=>{
+        const lodsList = filterLods();
+        /*[...ch,...chc, ...chk]*//*[...lod1, ...lod2, ...lod3]*/ lodsList.forEach(chunk=>{
             ctx.strokeStyle = '#000';
             ctx.strokeRect(
                 chunk.pos.x + canvas.width /2, 
@@ -173,6 +174,9 @@ const app = ()=>{
                 chunk.size - 3,
                 chunk.size - 3
             );
+            ctx.fillStyle = '#000';
+            ctx.font = 'normal 14px sans-serif';
+            ctx.fillText('cached: ' + chunks.length + ', visible: ' + lodsList.length, 10, 10);
         })
     }
     draw();

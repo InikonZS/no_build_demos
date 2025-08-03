@@ -35,6 +35,33 @@ class Wfcore {
     }
 }
 
+function distancePointToSegment(point, a, b) {
+    const { x: px, y: py } = point;
+    const { x: ax, y: ay } = a;
+    const { x: bx, y: by } = b;
+
+    const dx = bx - ax;
+    const dy = by - ay;
+
+    // Если отрезок вырожден в точку
+    if (dx === 0 && dy === 0) {
+        return Math.hypot(px - ax, py - ay);
+    }
+
+    // Проекция точки на линию в параметрическом виде
+    const t = ((px - ax) * dx + (py - ay) * dy) / (dx * dx + dy * dy);
+
+    // Ограничиваем t отрезком [0, 1]
+    const clampedT = Math.max(0, Math.min(1, t));
+
+    // Находим координаты ближайшей точки на отрезке
+    const closestX = ax + clampedT * dx;
+    const closestY = ay + clampedT * dy;
+
+    // Вычисляем расстояние
+    return Math.hypot(px - closestX, py - closestY);
+}
+
 const app = ()=>{
     const points = new Array(120).fill(null).map(it=> ({x: Math.random()* 800, y: Math.random()* 600}));
     const canvas = document.createElement('canvas');
@@ -58,7 +85,7 @@ const draw = (ctx, points)=>{
     });
 
     const swapIndexes = ()=>{
-        iconnect.findIndex((it, i)=>{
+        return -1 != iconnect.findIndex((it, i)=>{
             return iconnect.findIndex((jt, j)=>{
                 if (it.index != jt.index && it.next != jt.next && it.index != jt.next && it.next != jt.index){
                     //console.log('test ', a1i, b1i, a2i, b2i);
@@ -138,6 +165,31 @@ const draw = (ctx, points)=>{
         });
     }
 
+    const pdist = (a, b)=>{
+        return Math.hypot(a.x - b.x, a.y -b.y);
+    }
+
+    const optIndexes = ()=>{
+        iconnect.findIndex((it, i)=>{
+            return iconnect.findIndex((jt, j)=>{
+                if (it.index != jt.index && it.next != jt.next && it.index != jt.next && it.next != jt.index){
+                    const prev = iconnect.find(p=> p.next == it.index);
+                    //if (distancePointToSegment(points[it.index], points[jt.index], points[jt.next])< distancePointToSegment(points[it.index], points[prev.index], points[it.next])){
+                    if (pdist(points[prev.index], points[it.index]) + pdist(points[it.index], points[it.next]) - pdist(points[prev.index], points[it.next]) >
+                    pdist(points[jt.index], points[it.index]) + pdist(points[jt.next], points[it.index]) - pdist(points[jt.index], points[jt.next])
+                ){
+                        prev.next = it.next;
+                        let t = jt.next;
+                        jt.next = it.index;
+                        it.next = t;
+                        return true;
+
+                    }
+                }
+            }) != -1;
+        })  
+    }
+
     const render = ()=>{
         ctx.fillStyle = '#ccc';
         ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
@@ -158,12 +210,33 @@ const draw = (ctx, points)=>{
         });
     }
 
-    for (let k=0; k<1300; k++){
-        setTimeout(()=>{
-            swapIndexes();
-            render();
-        }, k*10);
+    const asc = async()=>{
+        console.log('uncross');
+        for (let k=0; k<1300; k++){
+            const r = await new Promise (res=>setTimeout(()=>{
+                    const found = swapIndexes();
+                    render();
+                    res(found);
+                }, 10)
+            );
+            if (!r){
+                console.log('iterations: ', k);
+                break;
+            }
+        }
+        console.log('optimize');
+        for (let k=0; k<1300; k++){
+            await new Promise (res=>setTimeout(()=>{
+                optIndexes();
+                const found = swapIndexes();
+                render();
+                res();
+            }, 10)
+        )
+        }
+        console.log('stopped');
     }
+    asc();
 }
 
 app();

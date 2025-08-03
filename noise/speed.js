@@ -63,7 +63,7 @@ function distancePointToSegment(point, a, b) {
 }
 
 const app = ()=>{
-    const points = new Array(120).fill(null).map(it=> ({x: Math.random()* 800, y: Math.random()* 600}));
+    const points = new Array(50).fill(null).map(it=> ({x: Math.random()* 800, y: Math.random()* 600}));
     const canvas = document.createElement('canvas');
     canvas.width = 856;
     canvas.height = 656;
@@ -170,7 +170,7 @@ const draw = (ctx, points)=>{
     }
 
     const optIndexes = ()=>{
-        iconnect.findIndex((it, i)=>{
+        return -1 != iconnect.findIndex((it, i)=>{
             return iconnect.findIndex((jt, j)=>{
                 if (it.index != jt.index && it.next != jt.next && it.index != jt.next && it.next != jt.index){
                     const prev = iconnect.find(p=> p.next == it.index);
@@ -184,6 +184,65 @@ const draw = (ctx, points)=>{
                         it.next = t;
                         return true;
 
+                    }
+                }
+            }) != -1;
+        })  
+    }
+
+    const optIndexes2 = ()=>{
+        return -1 != iconnect.findIndex((it, i)=>{
+            return iconnect.findIndex((jt, j)=>{
+                if (it.index != jt.index 
+                    && it.next != jt.next 
+                    && it.index != jt.next 
+                    && it.next != jt.index){
+                    const prev = iconnect.find(p=> p.next == it.index);
+                    const prev2 = iconnect.find(p=> p.next == prev.index);
+                    if (!(prev.index != jt.index 
+                        && prev.next != jt.next 
+                        && prev.index != jt.next 
+                        && prev.next != jt.index)){
+                            return false;
+                        }
+                    //if (distancePointToSegment(points[it.index], points[jt.index], points[jt.next])< distancePointToSegment(points[it.index], points[prev.index], points[it.next])){
+                    const currentDist = pdist(points[prev2.index], points[prev.index]) 
+                    + pdist(points[prev.index], points[it.index])
+                    + pdist(points[it.index], points[it.next])
+                    - pdist(points[prev2.index], points[it.next]);
+
+                    const v1Dist = pdist(points[jt.index], points[prev.index]) 
+                    + pdist(points[prev.index], points[it.index])
+                    + pdist(points[it.index], points[jt.next])
+                    - pdist(points[jt.index], points[jt.next]);
+
+                    const v2Dist = pdist(points[jt.index], points[it.index]) 
+                    + pdist(points[it.index], points[prev.index])
+                    + pdist(points[prev.index], points[jt.next])
+                    - pdist(points[jt.index], points[jt.next]);
+
+                    //console.log(v1Dist, v2Dist);
+                    if ( currentDist > v1Dist || currentDist > v2Dist){
+                        if (v1Dist < v2Dist){
+                            prev2.next = it.next;
+                            let t = jt.next;
+                            jt.next = prev.index;
+                            prev.next = it.index;
+                            it.next = t;
+                            //it.next = t;
+                            return true;
+                        } else {
+                            prev2.next = it.next;
+                            let t = jt.next;
+                            jt.next = it.index;
+
+                            it.next = prev.index;
+                            prev.next = t;
+                            //it.next = t;
+                            //it.next = t;
+                            
+                            return true;
+                        }
                     }
                 }
             }) != -1;
@@ -212,7 +271,7 @@ const draw = (ctx, points)=>{
 
     const asc = async()=>{
         console.log('uncross');
-        for (let k=0; k<1300; k++){
+        for (let k=0; k<3300; k++){
             const r = await new Promise (res=>setTimeout(()=>{
                     const found = swapIndexes();
                     render();
@@ -226,15 +285,48 @@ const draw = (ctx, points)=>{
         }
         console.log('optimize');
         for (let k=0; k<1300; k++){
-            await new Promise (res=>setTimeout(()=>{
-                optIndexes();
+            const nstop = await new Promise (res=>setTimeout(()=>{
+                const optFound = optIndexes();
+                /*const optFound2 = optIndexes2();
+                if(optFound2){
+                    console.log('o2');
+                }*/
                 const found = swapIndexes();
                 render();
-                res();
-            }, 10)
-        )
+                res(optFound || found );
+            }, 10));
+            if (!nstop){
+                break;
+            }
         }
         console.log('stopped');
+        {let len = 0;
+        iconnect.forEach(ind=>{
+            len+=pdist(points[ind.index], points[ind.next]);
+        });
+        console.log('len', len);}
+
+        for (let k=0; k<1300; k++){
+            const nstop = await new Promise (res=>setTimeout(()=>{
+                const optFound = optIndexes();
+                const optFound2 = optIndexes2();
+                if(optFound2){
+                    console.log('o2');
+                }
+                const found = swapIndexes();
+                render();
+                res(optFound || found || optFound2);
+            }, 200));
+            if (!nstop){
+                break;
+            }
+        }
+        {let len = 0;
+            iconnect.forEach(ind=>{
+                len+=pdist(points[ind.index], points[ind.next]);
+            });
+            console.log('len', len);}
+
     }
     asc();
 }

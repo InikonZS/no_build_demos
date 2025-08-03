@@ -1,3 +1,5 @@
+import { solveCutted } from "../xone/linear.js";
+
 const measure = (f)=>{
     const start = performance.now();
     const result = f();
@@ -34,14 +36,134 @@ class Wfcore {
 }
 
 const app = ()=>{
+    const points = new Array(120).fill(null).map(it=> ({x: Math.random()* 800, y: Math.random()* 600}));
     const canvas = document.createElement('canvas');
     canvas.width = 856;
     canvas.height = 656;
     document.body.append(canvas);
     const ctx = canvas.getContext('2d');
     const size = 20;
-    ctx.fillStyle = '#ccc';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    draw(ctx, points);
+}
+
+const draw = (ctx, points)=>{
+    const indexes = new Array(points.length).fill(0).map((it, i)=>i);
+    const iconnect = indexes.map((it, i)=>{
+        const a1i = indexes[(i + 0) % indexes.length];
+        const b1i = indexes[(i + 1) % indexes.length];
+        return {
+            index: a1i,
+            next: b1i
+        }
+    });
+
+    const swapIndexes = ()=>{
+        iconnect.findIndex((it, i)=>{
+            return iconnect.findIndex((jt, j)=>{
+                if (it.index != jt.index && it.next != jt.next && it.index != jt.next && it.next != jt.index){
+                    //console.log('test ', a1i, b1i, a2i, b2i);
+                    const res = solveCutted(points[it.index], points[it.next], points[jt.index], points[jt.next]);
+                    //console.log(res, it, jt, iconnect);
+                    if (res){
+                        const mi = iconnect.find(ci=>ci.index == it.next);
+                        const mj = iconnect.find(ci=>ci.index == jt.next);
+                        const sp = {...jt};
+                        const ep = {...it};
+                        //let t = m1.index;
+                        //m2.next = sp.index;
+                        /*it.next = sp.index;
+                        jt.next = ep.next;
+                        mi.next = sp.next;*/
+
+                        /*it.next = sp.index;
+                        jt.next = mi.index;
+                        mi.next = sp.next*/
+
+                        //it.next = sp.index;
+                        //mi.next = mj.index;
+                        //console.log(JSON.parse(JSON.stringify(iconnect)));
+                        let si = ep;
+                        const invlist = [];
+                        for (let c=0; c<1000; c++){
+                            if (si.index == sp.next){break}
+                            let tsi = iconnect.find(ci=>ci.next == si.index);
+                            //tsi.next = si.index;
+                            //si.index = tsi.next;
+                            si = tsi;
+                            invlist.push(si);
+                            //console.log('t ',c , si);
+                        }
+                        //console.log(invlist);
+                        const fsw = iconnect.filter(it=>invlist.find(pt=>it.index == pt.index ) == undefined
+                        && (!(it.index == ep.index && it.next == ep.next)) 
+                        && (!(it.index == sp.index && it.next == sp.next)));
+                        //console.log(JSON.parse(JSON.stringify({fsw, sp, ep})));
+                        let t = it.next;
+                        it.next = jt.index;
+                        jt.index = t;
+                        fsw.forEach((it, i)=>{
+                            /*if (i == fsw.length-1){
+                                return
+                            }
+                            if (i == 0){
+                                if ( it.next != fsw[fsw.length -1].index){
+                                    let t = it.next;
+                                    it.next = fsw[fsw.length -1].index;
+                                    fsw[fsw.length -1].index = t;
+                                } else {
+                                    
+                                    console.log('warn')
+                                }
+                                return
+                            }*/
+
+                            let t = it.next;
+                            it.next = it.index;
+                            it.index = t;
+                        })
+                        //let t = it.next;
+                        //it.next = jt.next;
+                        //jt.next = t;
+                        //let t = indexes[a1i];
+                        //indexes[a1i] = indexes[b2i];
+                        //indexes[b2i] = t;
+                        /*t = indexes[b2i];
+                        indexes[b2i] = indexes[b1i];
+                        indexes[b1i] = t;*/
+                        //console.log('swap ', a1i, a2i, indexes);
+                        return true;
+                    }
+                }
+            }) != -1;
+        });
+    }
+
+    const render = ()=>{
+        ctx.fillStyle = '#ccc';
+        ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+        iconnect.forEach((it, i)=>{
+            ctx.beginPath();
+            ctx.strokeStyle = '#00f';
+            ctx.moveTo(points[it.index].x, points[it.index].y);
+            ctx.strokeStyle = '#00f';
+            ctx.lineTo(points[it.next].x, points[it.next].y);
+            ctx.stroke();
+            ctx.fillStyle = '#000';
+            ctx.fillText(it.index, points[it.index].x, points[it.index].y);
+        });
+        points.forEach(it=>{
+            ctx.fillStyle = '#f00';
+            ctx.font = "16px";
+            ctx.fillRect(it.x, it.y, 4,4);  
+        });
+    }
+
+    for (let k=0; k<1300; k++){
+        setTimeout(()=>{
+            swapIndexes();
+            render();
+        }, k*10);
+    }
 }
 
 app();

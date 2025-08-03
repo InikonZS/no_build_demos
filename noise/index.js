@@ -102,6 +102,7 @@ const generateChunk = (ox, oy, chunkSize)=>{
     canvas.width = chunkSize;
     canvas.height = chunkSize;
     const ctx = canvas.getContext('2d');
+    const imageData = new ImageData(canvas.width, canvas.height);
     const octas = 9;
     for (let x=0; x<canvas.width; x++){
         for (let y=0; y<canvas.height; y++){
@@ -109,11 +110,17 @@ const generateChunk = (ox, oy, chunkSize)=>{
             for (k=4; k< octas; k++){
                 noiseValue = (noiseValue + (noise((x + ox) / 2 ** k, (y + oy) / 2 ** k)) /((octas-k) ** 1.2));
             }
-            ctx.fillStyle = noiseValue > 0 ? grey(0) : grey(255); 
+            //ctx.fillStyle = noiseValue > 0 ? grey(0) : grey(255); 
             //ctx.fillStyle = grey(Math.max(Math.min((noiseValue + 1) / 2 * 256, 255), 100));//grey((noiseValue + 1) / 2 * 256);
-            ctx.fillRect(x, y, 1, 1);
+            //ctx.fillRect(x, y, 1, 1);
+            const dataPoint = (y*imageData.width+x) * 4;
+            imageData.data[dataPoint + 0] = noiseValue > 0 ? 0 : 255;
+            imageData.data[dataPoint + 1] = noiseValue > 0 ? 0 : 255;
+            imageData.data[dataPoint + 2] = noiseValue > 0 ? 0 : 255;
+            imageData.data[dataPoint + 3] = 255;
         }
     }
+    ctx.putImageData(imageData, 0, 0);
     return canvas;
 }
 

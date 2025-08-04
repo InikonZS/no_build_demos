@@ -63,26 +63,31 @@ function distancePointToSegment(point, a, b) {
 }
 
 const app = ()=>{
-    const points = new Array(50).fill(null).map(it=> ({x: Math.random()* 800, y: Math.random()* 600}));
+    const points = new Array(120).fill(null).map(it=> ({x: Math.random()* 800, y: Math.random()* 600}));
     const canvas = document.createElement('canvas');
     canvas.width = 856;
     canvas.height = 656;
     document.body.append(canvas);
     const ctx = canvas.getContext('2d');
     const size = 20;
-    draw(ctx, points);
+    (async ()=>{
+        const _indexes = new Array(points.length).fill(0).map((it, i)=>i);
+        for (let v = 0; v<1; v++){
+            const indexes = _indexes.sort(it=>(Math.sign(Math.random() - 0.5)));
+            const iconnect = indexes.map((it, i)=>{
+                const a1i = indexes[(i + 0) % indexes.length];
+                const b1i = indexes[(i + 1) % indexes.length];
+                return {
+                    index: a1i,
+                    next: b1i
+                }
+            });
+            await draw(ctx, points, iconnect);
+        }
+    })();
 }
 
-const draw = (ctx, points)=>{
-    const indexes = new Array(points.length).fill(0).map((it, i)=>i);
-    const iconnect = indexes.map((it, i)=>{
-        const a1i = indexes[(i + 0) % indexes.length];
-        const b1i = indexes[(i + 1) % indexes.length];
-        return {
-            index: a1i,
-            next: b1i
-        }
-    });
+const draw = (ctx, points, iconnect)=>{
 
     const swapIndexes = ()=>{
         return -1 != iconnect.findIndex((it, i)=>{
@@ -249,6 +254,169 @@ const draw = (ctx, points)=>{
         })  
     }
 
+    const optIndexes3 = ()=>{
+        return -1 != iconnect.findIndex((it, i)=>{
+            return iconnect.findIndex((jt, j)=>{
+                if (it.index != jt.index 
+                    && it.next != jt.next 
+                    && it.index != jt.next 
+                    && it.next != jt.index){
+                    const prev = iconnect.find(p=> p.next == it.index);
+                    const prev2 = iconnect.find(p=> p.next == prev.index);
+                    const prev3 = iconnect.find(p=> p.next == prev2.index);
+                    if (!(prev.index != jt.index 
+                        && prev.next != jt.next 
+                        && prev.index != jt.next 
+                        && prev.next != jt.index)){
+                            return false;
+                        }
+                    if (!(prev2.index != jt.index 
+                        && prev2.next != jt.next 
+                        && prev2.index != jt.next 
+                        && prev2.next != jt.index)){
+                            return false;
+                        }
+                      /*  if (!(prev3.index != jt.index 
+                            && prev3.next != jt.next 
+                            && prev3.index != jt.next 
+                            && prev3.next != jt.index)){
+                                return false;
+                            }*/
+                    //if (distancePointToSegment(points[it.index], points[jt.index], points[jt.next])< distancePointToSegment(points[it.index], points[prev.index], points[it.next])){
+                    const currentDist = pdist(points[prev3.index], points[prev2.index]) 
+                    + pdist(points[prev2.index], points[prev.index]) 
+                    + pdist(points[prev.index], points[it.index])
+                    + pdist(points[it.index], points[it.next])
+                    - pdist(points[prev3.index], points[it.next]);
+
+                    const v1Dist = pdist(points[jt.index], points[prev2.index]) 
+                    + pdist(points[prev2.index], points[prev.index]) 
+                    + pdist(points[prev.index], points[it.index])
+                    + pdist(points[it.index], points[jt.next])
+                    - pdist(points[jt.index], points[jt.next]);
+
+                    const v2Dist = pdist(points[jt.index], points[it.index]) 
+                    + pdist(points[it.index], points[prev.index])
+                    + pdist(points[prev.index], points[prev2.index])
+                    + pdist(points[prev2.index], points[jt.next])
+                    - pdist(points[jt.index], points[jt.next]);
+
+                    //console.log(currentDist, v1Dist, v2Dist);
+                    if ( currentDist > v1Dist || currentDist > v2Dist){
+                        if (v1Dist < v2Dist){
+                            prev3.next = it.next;
+                            let t = jt.next;
+                            jt.next = prev2.index;
+                            prev2.next = prev.index;
+                            prev.next = it.index;
+                            it.next = t;
+                            //it.next = t;
+                            return true;
+                            console.log('v1')
+                        } else {
+                            prev3.next = it.next;
+                            let t = jt.next;
+                            jt.next = it.index;
+
+                            it.next = prev.index;
+                            prev.next = prev2.index;
+                            prev2.next = t;
+                            //it.next = t;
+                            //it.next = t;
+                            
+                            return true;
+                        }
+                    }
+                }
+            }) != -1;
+        })  
+    }
+
+    const optIndexes4 = ()=>{
+        return -1 != iconnect.findIndex((it, i)=>{
+            return iconnect.findIndex((jt, j)=>{
+                if (it.index != jt.index 
+                    && it.next != jt.next 
+                    && it.index != jt.next 
+                    && it.next != jt.index){
+                    const prev = iconnect.find(p=> p.next == it.index);
+                    const prev2 = iconnect.find(p=> p.next == prev.index);
+                    const prev3 = iconnect.find(p=> p.next == prev2.index);
+                    const prev4 = iconnect.find(p=> p.next == prev3.index);
+                    if (!(prev.index != jt.index 
+                        && prev.next != jt.next 
+                        && prev.index != jt.next 
+                        && prev.next != jt.index)){
+                            return false;
+                        }
+                    if (!(prev2.index != jt.index 
+                        && prev2.next != jt.next 
+                        && prev2.index != jt.next 
+                        && prev2.next != jt.index)){
+                            return false;
+                        }
+                        if (!(prev3.index != jt.index 
+                            && prev3.next != jt.next 
+                            && prev3.index != jt.next 
+                            && prev3.next != jt.index)){
+                                return false;
+                            }
+                    //if (distancePointToSegment(points[it.index], points[jt.index], points[jt.next])< distancePointToSegment(points[it.index], points[prev.index], points[it.next])){
+                    const currentDist = pdist(points[prev4.index], points[prev3.index])
+                    + pdist(points[prev3.index], points[prev2.index]) 
+                    + pdist(points[prev2.index], points[prev.index]) 
+                    + pdist(points[prev.index], points[it.index])
+                    + pdist(points[it.index], points[it.next])
+                    - pdist(points[prev4.index], points[it.next]);
+
+                    const v1Dist = pdist(points[jt.index], points[prev3.index]) 
+                    + pdist(points[prev3.index], points[prev2.index]) 
+                    + pdist(points[prev2.index], points[prev.index]) 
+                    + pdist(points[prev.index], points[it.index])
+                    + pdist(points[it.index], points[jt.next])
+                    - pdist(points[jt.index], points[jt.next]);
+
+                    const v2Dist = pdist(points[jt.index], points[it.index]) 
+                    + pdist(points[it.index], points[prev.index])
+                    + pdist(points[prev.index], points[prev2.index])
+                    + pdist(points[prev2.index], points[prev3.index])
+                    + pdist(points[prev3.index], points[jt.next])
+                    - pdist(points[jt.index], points[jt.next]);
+
+                    //console.log(currentDist, v1Dist, v2Dist);
+                    if ( currentDist > v1Dist || currentDist > v2Dist){
+                        if (v1Dist < v2Dist){
+                            prev4.next = it.next;
+                            let t = jt.next;
+                            jt.next = prev3.index;
+                            prev3.next = prev2.index;
+                            prev2.next = prev.index;
+                            prev.next = it.index;
+                            it.next = t;
+                            //it.next = t;
+                            return true;
+                            console.log('v1')
+                        } else {
+                            prev4.next = it.next;
+                            let t = jt.next;
+                            jt.next = it.index;
+
+                            it.next = prev.index;
+                            prev.next = prev2.index;
+                            prev2.next = prev3.index;
+                            prev3.next = t;
+                            //it.next = t;
+                            //it.next = t;
+                            
+                            return true;
+                        }
+                    }
+                }
+            }) != -1;
+        })  
+    }
+
+
     const render = ()=>{
         ctx.fillStyle = '#ccc';
         ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
@@ -321,6 +489,42 @@ const draw = (ctx, points)=>{
                 break;
             }
         }
+
+        {let len = 0;
+            iconnect.forEach(ind=>{
+                len+=pdist(points[ind.index], points[ind.next]);
+            });
+            console.log('len', len);}
+
+        for (let k=0; k<1300; k++){
+            const nstop = await new Promise (res=>setTimeout(()=>{
+                const optFound = optIndexes();
+                const optFound2 = optIndexes2();
+                if(optFound2){
+                    console.log('o2');
+                }
+                let optFound3 = false;
+                if (!optFound2){
+                    optFound3 = optIndexes3();
+                    if(optFound3){
+                        console.log('o3');
+                    }
+                }
+                let optFound4 = false;
+                if (!optFound3){
+                    optFound4 = optIndexes4();
+                    if(optFound4){
+                        console.log('o4');
+                    }
+                }
+                const found = swapIndexes();
+                render();
+                res(optFound || found || optFound2 || optFound3 || optFound4);
+            }, 200));
+            if (!nstop){
+                break;
+            }
+        }
         {let len = 0;
             iconnect.forEach(ind=>{
                 len+=pdist(points[ind.index], points[ind.next]);
@@ -328,7 +532,7 @@ const draw = (ctx, points)=>{
             console.log('len', len);}
 
     }
-    asc();
+    return asc();
 }
 
 app();

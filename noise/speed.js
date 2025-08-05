@@ -62,18 +62,63 @@ function distancePointToSegment(point, a, b) {
     return Math.hypot(px - closestX, py - closestY);
 }
 
+function shuffleArray(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1)); // случайный индекс от 0 до i
+      [arr[i], arr[j]] = [arr[j], arr[i]]; // обмен значениями
+    }
+    return arr;
+  }
+
+const greedy = (points)=>{
+    
+    const pdist = (a, b)=>{
+        return Math.hypot(a.x - b.x, a.y -b.y);
+    }
+
+    let currentPoint = points[0];
+    let iconnect = [];
+    let pointMap = {0: true};
+    let cpIndex = 0;
+    points.forEach((it, i)=>{
+        let min = Number.MAX_SAFE_INTEGER;
+        let minIndex = -1;
+        points.forEach((jt, j)=>{
+            if (pointMap[j]){
+                return;
+            }
+            if (pdist(currentPoint, jt)< min){
+                min = pdist(currentPoint, jt);
+                minIndex = j;
+            }
+        });
+        if (minIndex == -1){
+            return;
+        }
+        iconnect.push({index: cpIndex, next: minIndex});
+        currentPoint = points[minIndex];
+        pointMap[minIndex] = true;
+        cpIndex = minIndex;
+    });
+    iconnect.push({index: iconnect[iconnect.length -1].next, next: 0});
+    return iconnect;
+}
+
 const app = ()=>{
-    const points = new Array(120).fill(null).map(it=> ({x: Math.random()* 800, y: Math.random()* 600}));
+    const _points = new Array(300).fill(null).map(it=> ({x: Math.random()* 800, y: Math.random()* 600}));
     const canvas = document.createElement('canvas');
     canvas.width = 856;
     canvas.height = 656;
     document.body.append(canvas);
     const ctx = canvas.getContext('2d');
     const size = 20;
+    let minLen = Number.MAX_SAFE_INTEGER;
+    let maxLen = Number.MIN_SAFE_INTEGER;
+    let average = 0;
     (async ()=>{
-        const _indexes = new Array(points.length).fill(0).map((it, i)=>i);
+        const _indexes = new Array(_points.length).fill(0).map((it, i)=>i);
         for (let v = 0; v<1; v++){
-            const indexes = _indexes.sort(it=>(Math.sign(Math.random() - 0.5)));
+            const indexes = shuffleArray(_indexes);//_indexes.sort(it=>(Math.sign(Math.random() - 0.5)));
             const iconnect = indexes.map((it, i)=>{
                 const a1i = indexes[(i + 0) % indexes.length];
                 const b1i = indexes[(i + 1) % indexes.length];
@@ -82,8 +127,23 @@ const app = ()=>{
                     next: b1i
                 }
             });
-            await draw(ctx, points, iconnect);
+            const points = shuffleArray(_points);
+            const iconnectGreedy = greedy(points);
+            console.log(iconnectGreedy);
+            const len = await draw(ctx, points, iconnectGreedy);
+            if (len< minLen){
+                minLen = len;
+            }
+            if (average == 0){
+                average = len;
+            } else {
+                average = (average + len)/2;
+            }
+            if (len> maxLen){
+                maxLen = len;
+            }
         }
+        console.log('MIN:', minLen, 'MAX:', maxLen, 'AV: ', Math.floor(average));
     })();
 }
 
@@ -97,8 +157,8 @@ const draw = (ctx, points, iconnect)=>{
                     const res = solveCutted(points[it.index], points[it.next], points[jt.index], points[jt.next]);
                     //console.log(res, it, jt, iconnect);
                     if (res){
-                        const mi = iconnect.find(ci=>ci.index == it.next);
-                        const mj = iconnect.find(ci=>ci.index == jt.next);
+                      //  const mi = iconnect.find(ci=>ci.index == it.next);
+                      //  const mj = iconnect.find(ci=>ci.index == jt.next);
                         const sp = {...jt};
                         const ep = {...it};
                         //let t = m1.index;
@@ -116,17 +176,20 @@ const draw = (ctx, points, iconnect)=>{
                         //console.log(JSON.parse(JSON.stringify(iconnect)));
                         let si = ep;
                         const invlist = [];
-                        for (let c=0; c<1000; c++){
+                        const invMap = {};
+                        for (let c=0; c<3000; c++){
                             if (si.index == sp.next){break}
                             let tsi = iconnect.find(ci=>ci.next == si.index);
                             //tsi.next = si.index;
                             //si.index = tsi.next;
                             si = tsi;
                             invlist.push(si);
+                            invMap[si.index] = si;
                             //console.log('t ',c , si);
                         }
                         //console.log(invlist);
-                        const fsw = iconnect.filter(it=>invlist.find(pt=>it.index == pt.index ) == undefined
+                        //const fsw = iconnect.filter(it=>invlist.find(pt=>it.index == pt.index ) == undefined
+                        const fsw = iconnect.filter(it=>invMap[it.index] == undefined
                         && (!(it.index == ep.index && it.next == ep.next)) 
                         && (!(it.index == sp.index && it.next == sp.next)));
                         //console.log(JSON.parse(JSON.stringify({fsw, sp, ep})));
@@ -163,6 +226,7 @@ const draw = (ctx, points, iconnect)=>{
                         indexes[b2i] = indexes[b1i];
                         indexes[b1i] = t;*/
                         //console.log('swap ', a1i, a2i, indexes);
+                        updMap = true;
                         return true;
                     }
                 }
@@ -174,19 +238,38 @@ const draw = (ctx, points, iconnect)=>{
         return Math.hypot(a.x - b.x, a.y -b.y);
     }
 
-    const optIndexes = ()=>{
+    let updMap = true;
+    let iconnectMap = {};
+    const optIndexes = (temp = 0)=>{
+        if (updMap){
+        iconnectMap = {};
+        iconnect.forEach(it=>{iconnectMap[it.next] = it});
+        updMap = false;
+        }
         return -1 != iconnect.findIndex((it, i)=>{
             return iconnect.findIndex((jt, j)=>{
                 if (it.index != jt.index && it.next != jt.next && it.index != jt.next && it.next != jt.index){
-                    const prev = iconnect.find(p=> p.next == it.index);
+                    const prev = iconnectMap[it.index];//iconnect.find(p=> p.next == it.index);
                     //if (distancePointToSegment(points[it.index], points[jt.index], points[jt.next])< distancePointToSegment(points[it.index], points[prev.index], points[it.next])){
                     if (pdist(points[prev.index], points[it.index]) + pdist(points[it.index], points[it.next]) - pdist(points[prev.index], points[it.next]) >
-                    pdist(points[jt.index], points[it.index]) + pdist(points[jt.next], points[it.index]) - pdist(points[jt.index], points[jt.next])
+                    pdist(points[jt.index], points[it.index]) + pdist(points[jt.next], points[it.index]) - pdist(points[jt.index], points[jt.next]) - temp
                 ){
+                    //if (it.next == jt.next || it.next == prev.next || jt.next == prev.next){
+                      //  return;
+                    //}
+                        /*iconnectMap[it.next] = null;
+                        iconnectMap[jt.next] = null;
+                        iconnectMap[prev.next] = null*/
                         prev.next = it.next;
                         let t = jt.next;
                         jt.next = it.index;
                         it.next = t;
+                        
+                        iconnectMap[it.next] = it;
+                        iconnectMap[jt.next] = jt;
+                        iconnectMap[prev.next] = prev;
+                        //console.log(JSON.parse(JSON.stringify(iconnectMap)), it.next, jt.next, prev.next, it.index)
+                        //updMap = true;
                         return true;
 
                     }
@@ -195,7 +278,7 @@ const draw = (ctx, points, iconnect)=>{
         })  
     }
 
-    const optIndexes2 = ()=>{
+    const optIndexes2 = (temp)=>{
         return -1 != iconnect.findIndex((it, i)=>{
             return iconnect.findIndex((jt, j)=>{
                 if (it.index != jt.index 
@@ -235,6 +318,7 @@ const draw = (ctx, points, iconnect)=>{
                             prev.next = it.index;
                             it.next = t;
                             //it.next = t;
+                            updMap = true;
                             return true;
                         } else {
                             prev2.next = it.next;
@@ -246,6 +330,7 @@ const draw = (ctx, points, iconnect)=>{
                             //it.next = t;
                             //it.next = t;
                             
+                            updMap = true;
                             return true;
                         }
                     }
@@ -254,7 +339,7 @@ const draw = (ctx, points, iconnect)=>{
         })  
     }
 
-    const optIndexes3 = ()=>{
+    const optIndexes3 = (temp)=>{
         return -1 != iconnect.findIndex((it, i)=>{
             return iconnect.findIndex((jt, j)=>{
                 if (it.index != jt.index 
@@ -302,7 +387,7 @@ const draw = (ctx, points, iconnect)=>{
                     - pdist(points[jt.index], points[jt.next]);
 
                     //console.log(currentDist, v1Dist, v2Dist);
-                    if ( currentDist > v1Dist || currentDist > v2Dist){
+                    if ( currentDist > v1Dist /*- Math.random() * 500*/ || currentDist > v2Dist /*- Math.random() * 500*/){
                         if (v1Dist < v2Dist){
                             prev3.next = it.next;
                             let t = jt.next;
@@ -311,6 +396,7 @@ const draw = (ctx, points, iconnect)=>{
                             prev.next = it.index;
                             it.next = t;
                             //it.next = t;
+                            updMap = true;
                             return true;
                             console.log('v1')
                         } else {
@@ -324,6 +410,7 @@ const draw = (ctx, points, iconnect)=>{
                             //it.next = t;
                             //it.next = t;
                             
+                            updMap = true;
                             return true;
                         }
                     }
@@ -394,6 +481,7 @@ const draw = (ctx, points, iconnect)=>{
                             prev.next = it.index;
                             it.next = t;
                             //it.next = t;
+                            updMap = true;
                             return true;
                             console.log('v1')
                         } else {
@@ -408,6 +496,7 @@ const draw = (ctx, points, iconnect)=>{
                             //it.next = t;
                             //it.next = t;
                             
+                            updMap = true;
                             return true;
                         }
                     }
@@ -454,7 +543,7 @@ const draw = (ctx, points, iconnect)=>{
         console.log('optimize');
         for (let k=0; k<1300; k++){
             const nstop = await new Promise (res=>setTimeout(()=>{
-                const optFound = optIndexes();
+                const optFound = optIndexes(/*Math.max((100 - k) / 10, 0)*/0);
                 /*const optFound2 = optIndexes2();
                 if(optFound2){
                     console.log('o2');
@@ -484,7 +573,7 @@ const draw = (ctx, points, iconnect)=>{
                 const found = swapIndexes();
                 render();
                 res(optFound || found || optFound2);
-            }, 200));
+            }, 10));
             if (!nstop){
                 break;
             }
@@ -520,7 +609,7 @@ const draw = (ctx, points, iconnect)=>{
                 const found = swapIndexes();
                 render();
                 res(optFound || found || optFound2 || optFound3 || optFound4);
-            }, 200));
+            }, 10));
             if (!nstop){
                 break;
             }
@@ -529,8 +618,10 @@ const draw = (ctx, points, iconnect)=>{
             iconnect.forEach(ind=>{
                 len+=pdist(points[ind.index], points[ind.next]);
             });
-            console.log('len', len);}
-
+            console.log('len', len);
+            return len;
+        }
+        
     }
     return asc();
 }

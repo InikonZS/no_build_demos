@@ -154,7 +154,18 @@ function init(){
         player.b.pos.y +=speed.y*k;
         player.step(lines);
         if (player.sects.length){
-            const norm = player.sects[0].obj.normal
+            const mnorm = player.sects.reduce((acc, sc)=>{
+                const nn = {
+                    x: (acc.x + sc.obj.normal.x) /2, 
+                    y: (acc.y + sc.obj.normal.y) /2, 
+                }
+                const len = Math.hypot(nn.x, nn.y);
+               // (len <1) && console.log({x:nn.x/len, y: nn.y/len}, len,  Math.hypot(nn.x/len, nn.y/len));
+                //(len ==1) && console.log('shit');
+                return {x:nn.x/len, y: nn.y/len}
+            }, player.sects[0].obj.normal);
+            const norm = mnorm// rotate(mnorm, Math.PI /2);
+            //const norm = player.sects[0].obj.normal
             const dot = norm.x*speed.x + norm.y*speed.y;
             const reflected = {
                 x: speed.x - (norm.x * 2 * dot),

@@ -244,7 +244,7 @@ const optimizePolyDynamic1 = (poly)=>{
     return polyIndexed.filter(it=>it.cnt > /*180*/42)//!it.deleted);
 }
 
-const optimizePolyDynamic = (poly)=>{
+const optimizePolyDynamic = (poly, val, val2)=>{
     const polyIndexed = poly.map(it=>({...it, deleted: false, cnt:0}));
     const getPoint = (index)=>{
         return polyIndexed[(index + polyIndexed.length) % polyIndexed.length];
@@ -252,25 +252,28 @@ const optimizePolyDynamic = (poly)=>{
     for (let i = 0; i< polyIndexed.length; i++){
         const prev = getPoint(i);
         const sums = [];
-        for (let k = 0; k < 80; k++){
+        let len = 180;
+        for (let k = 0; k < len; k++){
             const next = getPoint(i+k+2);
             let sumSigned = 0;
             let sumUnsigned = 0;
             for (let sk = 0; sk < k + 1; sk++){
                 const current = getPoint(i+sk+1);
                 const dist = pdist(current, prev, next);
-                sumSigned += dist // (k+1);
+                //sumSigned += dist / (k+1); //optional k
+                //sumUnsigned += Math.abs(dist) / (k+1);
+                sumSigned += dist // (k+1); //optional k q=1
                 sumUnsigned += Math.abs(dist) // (k+1);
             }
             sums.push({
                 sumSigned,
                 sumUnsigned
             })
-            const q = 0.3 //* k +1;
-            if ((Math.abs(sumSigned) > 8/q || sumUnsigned > 18.4/q) || k == (80-1)){
-                let kk =k;
+            const q = val/36;//11 //0.25 * k +1;
+            if ((Math.abs(sumSigned) > 8/q || sumUnsigned > 18.4/(q)) || k == (len-1)){
+                let kk = 1;//k;
                 for (let op = k - 1; op>=0; op--){
-                    if (Math.abs(sums[op].sumSigned) < 0.7*4 ){
+                    if (Math.abs(sums[op].sumSigned) < /*0.77/(k+1)*/ 0.77*(val2) ){
                         kk = op;
                         break;
                     }
@@ -294,6 +297,21 @@ const app = () => {
     inp.type = 'file';
     inp.accept = "image/*";
     document.body.append(inp);
+
+    const inp1 = document.createElement('input');
+    inp1.type = 'range';
+    inp1.min = 1;
+    inp1.max = 36;
+    inp1.value = 18;//inp1.min;
+    document.body.append(inp1);
+
+    const inp2 = document.createElement('input');
+    inp2.type = 'range';
+    inp2.min = 1;
+    inp2.max = 36;
+    inp2.value = inp2.min;
+    document.body.append(inp2);
+
     inp.onchange = (e)=>{
         processFile(e.target.files[0], (img)=>{
             const size = 2;
@@ -313,7 +331,16 @@ const app = () => {
                 console.log(poly1);
                 //const optimized = optimizePolySoft1(optimizePolyHard(poly1));
                 //const optimized = optimizePolySoft(poly1);
-                const optimized = optimizePolyDynamic(poly1);
+                //const optimized = optimizePolyDynamic(optimizePolyDynamic(poly1));
+                const upd = (val, val2)=>{
+                const optimized = optimizePolyDynamic(poly1, val, val2);
+                const hitarea = [];
+                optimized.forEach(it=>{
+                    hitarea.push(it.x);
+                    hitarea.push(it.y);
+                })
+                console.log(optimized);
+                console.log('hitarea', hitarea)
                 ctx.fillStyle = '#000';
                 ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
                 ctx.drawImage(img, 0, 0, img.naturalWidth * size, img.naturalHeight * size);
@@ -332,6 +359,14 @@ const app = () => {
                 optimized.forEach((it, i) => {
                     ctx.fillRect(it.x * size, it.y * size, 3, 3)
                 })
+                }
+                upd(inp1.value, inp2.value);
+                inp1.oninput = ()=>{
+                    upd(inp1.value, inp2.value);
+                }
+                inp2.oninput = ()=>{
+                    upd(inp1.value, inp2.value);
+                }
             }
         })
     }

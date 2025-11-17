@@ -1,0 +1,32 @@
+*{
+    box-sizing: border-box;
+}
+
+.fieldWrapper{
+    --cols: 9;
+    --gap: 5px;
+    gap: var(--gap);
+    display: flex;
+    flex-wrap: wrap;
+    max-width: 250px;
+}
+
+.cell{
+    width: calc(((100% - (var(--gap) * (var(--cols) - 1))) / var(--cols)));
+    border: 1px solid #ccc;
+    aspect-ratio: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    user-select: none;
+    cursor: default;
+    border-radius: 3px;
+}
+
+.cell_hint{
+    background-color: #cfc;
+}
+
+.cell_selected{
+    background-color: #3c3;
+}

@@ -257,8 +257,10 @@ const optimizePolyDynamic = (poly, val, val2)=>{
             const next = getPoint(i+k+2);
             let sumSigned = 0;
             let sumUnsigned = 0;
+            let plist = []
             for (let sk = 0; sk < k + 1; sk++){
                 const current = getPoint(i+sk+1);
+                plist.push(current);
                 const dist = pdist(current, prev, next);
                 //sumSigned += dist / (k+1); //optional k
                 //sumUnsigned += Math.abs(dist) / (k+1);
@@ -267,7 +269,9 @@ const optimizePolyDynamic = (poly, val, val2)=>{
             }
             sums.push({
                 sumSigned,
-                sumUnsigned
+                sumUnsigned,
+                k,
+                plist
             })
             const q = val/36;//11 //0.25 * k +1;
             if ((Math.abs(sumSigned) > 8/q || sumUnsigned > 18.4/(q)) || k == (len-1)){
@@ -314,26 +318,28 @@ const app = () => {
 
     inp.onchange = (e)=>{
         processFile(e.target.files[0], (img)=>{
-            const size = 2;
+            const size = 1;
+            const presize = 1;
             ctx.fillStyle = '#000';
             ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
             ctx.drawImage(img, 0, 0, img.naturalWidth * size, img.naturalHeight * size);
 
             const hcanv = document.createElement('canvas');
             //console.log(img)
-            hcanv.width = img.naturalWidth;
-            hcanv.height = img.naturalHeight;
+            hcanv.width = img.naturalWidth * presize;
+            hcanv.height = img.naturalHeight * presize;
             const hctx = hcanv.getContext('2d');
-            hctx.drawImage(img, 0, 0);
+            hctx.drawImage(img, 0, 0, img.naturalWidth * presize, img.naturalHeight * presize);
             canvas.onclick = (e)=>{
-                const [btm, color] = toBitmap(hctx, {x: Math.floor(e.offsetX / size), y: Math.floor(e.offsetY / size)}, 60);
-                const poly1 = getPoly(btm);
+                const [btm, color] = toBitmap(hctx, {x: Math.floor(e.offsetX / size * presize), y: Math.floor(e.offsetY / size * presize)}, 60);
+                const poly1 = getPoly(btm).map(it=>({x: it.x / presize, y: it.y / presize}));
                 console.log(poly1);
                 //const optimized = optimizePolySoft1(optimizePolyHard(poly1));
                 //const optimized = optimizePolySoft(poly1);
                 //const optimized = optimizePolyDynamic(optimizePolyDynamic(poly1));
                 const upd = (val, val2)=>{
                 const optimized = optimizePolyDynamic(poly1, val, val2);
+                //const optimized = optimizePolyDynamic(optimizePolyDynamic(poly1, val, val2), val, val2);
                 const hitarea = [];
                 optimized.forEach(it=>{
                     hitarea.push(it.x);
@@ -354,6 +360,7 @@ const app = () => {
                         ctx.lineTo(it.x * size, it.y * size)
                     }
                 })
+                //ctx.fill();
                 ctx.stroke();
                 ctx.fillStyle = '#f90';
                 optimized.forEach((it, i) => {

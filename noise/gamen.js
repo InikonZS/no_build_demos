@@ -30,6 +30,8 @@ class GamenModel {
                 this.selected = null;
             }
         }
+        this.field.splice(this.getLastEmpty());
+        console.log(this.field, this.getLastEmpty());
         this.onUpdate?.();
     }
 
@@ -95,7 +97,7 @@ class GamenModel {
             if(it){
                 if (lastIndex != null){
                     if (this.checkCells(lastIndex, i)){
-                        moves.push([lastIndex, i]);
+                        moves.push([lastIndex, i, 'h']);
                         lastIndex = i;
                     } else {
                         lastIndex = i;
@@ -111,7 +113,7 @@ class GamenModel {
                 pos += 9;
                 if  (this.field[pos]){
                     if (this.checkCells(lastIndex, pos)){
-                        moves.push([lastIndex, pos]);
+                        moves.push([lastIndex, pos, 'v']);
                         lastIndex = pos;
                     } else {
                         lastIndex = pos;
@@ -124,7 +126,55 @@ class GamenModel {
     }
 }
 
+class CellView{
+    constructor(parent){
+        const cell = document.createElement('div');
+        parent.append(cell);
+        this.node = cell;
+    }
+
+    update(value){
+        const cell = this.node;
+        cell.textContent = value;//gamenModel.field[i];
+        if (gamenModel.selected == i){
+            cell.className = 'cell cell_selected';
+        } else
+        if (avCells.includes(i)){
+            cell.className = 'cell cell_hint';
+        } else {
+            cell.className = 'cell';
+        }
+        const betweenH = moves.find(it=>i> it[0] && i<it[1] && it[2] == 'h') != undefined
+        const betweenV = moves.find(it=>i> it[0] && i<it[1] && it[2] && (it[0] % 9 == i % 9) && it[2]== 'v') != undefined;
+        if (betweenV || betweenH){
+            cell.classList.add('cell_between');
+        }
+        if (betweenV){
+            cell.classList.add('cell_betweenV');
+        }
+        if (betweenH){
+            cell.classList.add('cell_betweenH');
+        }
+    }
+}
+
 const app = () =>{
+    const animations = [];
+    let resolving = false;
+    const resolveAnimations = async ()=>{
+        if (resolving){
+            return;
+        }
+        console.log('start resolving')
+        while (animations[0]){
+            const animation = animations.shift();
+            await animation();
+            console.log('resolve', animations.length)
+        }
+        resolving = false;
+        console.log('stop resolving')
+        return true;
+    }
     const gamenModel = new GamenModel();
     gamenModel.onUpdate = ()=>{
         console.log(gamenModel);
@@ -142,11 +192,12 @@ const app = () =>{
     fieldWrapper.className = 'fieldWrapper';
     document.body.append(fieldWrapper);
 
-    const cells = [];
+    let cells = [];
 
     const update = ()=>{
         const moves = gamenModel.findMoves();
         const avCells = [];
+        //const avIntervals = [];
         const updateCell = (i)=>{
             const cell = cells[i];
             cell.textContent = gamenModel.field[i];
@@ -158,9 +209,56 @@ const app = () =>{
             } else {
                 cell.className = 'cell';
             }
+            const betweenH = moves.find(it=>i> it[0] && i<it[1] && it[2] == 'h') != undefined
+            const betweenV = moves.find(it=>i> it[0] && i<it[1] && it[2] && (it[0] % 9 == i % 9) && it[2]== 'v') != undefined;
+            if (betweenV || betweenH){
+                cell.classList.add('cell_between');
+            }
+            if (betweenV){
+                cell.classList.add('cell_betweenV');
+            }
+            if (betweenH){
+                cell.classList.add('cell_betweenH');
+            }
         }
         moves.forEach(it=>it.forEach(jt=>avCells.push(jt)))
-        gamenModel.field.forEach((it, i)=>{
+        cells.forEach((cell, cellIndex)=>{
+            if (gamenModel.field.length<=cellIndex){
+                cells[cellIndex] = undefined;
+                cell.textContent = '';
+                cell.className = 'cell';
+                animations.push(
+                    ()=>{
+                const animation = cell.animate([
+                    {
+                        transform: 'scale(1)',
+                        offset: 0
+                    },
+                    {
+                        transform: 'scale(1.2)',
+                        offset: 0.2
+                    },
+                    {
+                        transform: 'scale(0)',
+                        offset: 1
+                    },
+                ], {
+                    duration: 400,
+                    iterations: 1,
+                });
+                animation.onfinish = ()=>{
+                    cell.remove();
+                }
+                setTimeout(()=>{
+                    resolve();
+                }, 50);
+                animation.play()
+            });
+            }
+            resolveAnimations();
+        });
+        cells = cells.filter(it=>it)
+        /*const addOrUpdate = ()=>*/ gamenModel.field.forEach((it, i)=>{
             if (cells[i]){
                 updateCell(i);
             } else {
@@ -172,9 +270,43 @@ const app = () =>{
                     }
                 }
                 cells.push(cell);
+                cell.style.transform = 'scale(0)';
                 updateCell(i)
+                animations.push(
+                    ()=>{
+                        return new Promise(resolve=>{
+                            console.log('ani')
+                            const animation = cell.animate([
+                                {
+                                    transform: 'scale(0)',
+                                    offset: 0
+                                },
+                                {
+                                    transform: 'scale(1.2)',
+                                    offset: 0.5
+                                },
+                                {
+                                    transform: 'scale(1.0)',
+                                    offset: 1
+                                },
+                            ], {
+                                duration: 200,
+                                iterations: 1,
+                            });
+                            animation.onfinish = ()=>{
+                                cell.style.transform = 'scale(1)';
+                                //resolve();
+                            }
+                            setTimeout(()=>{
+                                resolve();
+                            }, 25);
+                            animation.play()
+                        })
+                    }
+                );
             }
         });
+        resolveAnimations();
     }
     update();
 }

@@ -30,3 +30,18 @@
 .cell_selected{
     background-color: #3c3;
 }
+.cell_between{
+    border: 1px solid transparent;
+    border-radius: 0;
+}
+.cell_betweenV{
+    /*background-color: rgb(224, 255, 224);*/
+    border-left: 1px solid #3c3;
+    border-right: 1px solid #3c3;
+}
+
+.cell_betweenH{
+    /*background-color: rgb(224, 255, 224);*/
+    border-top: 1px solid #3c3;
+    border-bottom: 1px solid #3c3;
+}

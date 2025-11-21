@@ -231,6 +231,7 @@ body{
     user-select: none;
     cursor: default;
     border-radius: 3px;
+    position: relative;
 }
 
 .cell_hint{
@@ -259,7 +260,19 @@ body{
 }
 .cell_betweenV.cell_betweenH{
     width: 100%;
-    height: 100%;
+    border-top: none;
+    border-bottom: none;
+    /*height: 100%;*/
+}
+
+.cell_betweenV.cell_betweenH::before{
+    box-sizing: border-box;
+    content: "";
+    position: absolute;
+    height: calc(var(--cellSize));
+    width: calc(var(--cellSize) + var(--gap) * 2);
+    border-top: 1px solid #3c3;
+    border-bottom: 1px solid #3c3;
 }
 
 .ghostCell{

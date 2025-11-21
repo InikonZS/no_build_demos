@@ -18,6 +18,7 @@ class GamenModel {
     }
 
     select(index){
+        this.removedLines = [];
         console.log(this.selected, index)
         //let result;
         if (this.selected == null){
@@ -37,6 +38,7 @@ class GamenModel {
             }
         }
         this.field.splice(this.getLastEmpty());
+        this.removeEmptyLines();
         console.log(this.field, this.getLastEmpty());
         this.onUpdate?.();
         //return result;
@@ -84,6 +86,7 @@ class GamenModel {
     }
 
     addNums(){
+        this.removedLines = [];
         this.lastMove = undefined;
         this.selected = null;
         const lastEmpty = this.getLastEmpty();
@@ -93,6 +96,31 @@ class GamenModel {
             this.field[i+lastEmpty] = it;
         });
         this.onUpdate?.();
+    }
+
+    removeEmptyLines(){
+        const lines = [];
+        for (let i = 0; i<Math.floor(this.field.length / 9); i++){
+            let isEmpty = true;
+            for (let j=0; j< this.fieldLength; j++){
+                if (this.field[i*9+j] || i*9+j >= this.field.length){
+                    isEmpty = false;
+                    //return;
+                }
+            }
+            if (isEmpty){
+                lines.push(i);
+            }
+        }
+        console.log('empty lines', lines);
+        this.removedLines = lines.reverse();
+        this.removedLines.forEach(line=>{
+            //this.field.splice(line*9, 9)
+            for (let j=0; j<9; j++){
+                this.field[line*9 + j] = 'deleted';
+            }
+        })
+        this.field = this.field.filter(it=>it !== 'deleted')
     }
 
     findMoves(){
@@ -217,9 +245,9 @@ class GhostCell {
         //cell.style.height = (10+3) * 3 + 'px'
     }
 
-    fadeOut() {
-        const cell = this.cellInner;
-        const fadeProcess = () => new Promise(resolve => {
+    animateFade() {
+        return new Promise(resolve => {
+            const cell = this.cellInner;
             const prop = this.isVertical ? 'height' : 'width';
             const animation = cell.animate([
                 {
@@ -249,8 +277,13 @@ class GhostCell {
                 this.node.remove();
             }
             animation.play()
-        });
+        })
+    }
+
+    fadeOut() {
+        const fadeProcess = () => this.animateFade();
         this.onAnimate(fadeProcess);
+        return fadeProcess;
     }
 }
 
@@ -297,11 +330,11 @@ class CellView {
         }
     }
 
-    fadeOut() {
-        const cell = this.cellInner;
-        cell.className = 'cell';
-        cell.textContent = '';
-        const fadeProcess = () => new Promise(resolve => {
+    animateFade(){
+        console.log('empty fade')
+        return new Promise(resolve => {
+            console.log('empty prom')
+            const cell = this.cellInner;
             const animation = cell.animate([
                 {
                     transform: 'scale(1)',
@@ -320,12 +353,22 @@ class CellView {
                 iterations: 1,
             });
             animation.onfinish = () => {
-                this.node.remove();
-            }
+                cell.style.transform = 'scale(0)';
+                resolve();
+            };
+            animation.play()
+        })
+    }
+
+    fadeOut() {
+        const cell = this.cellInner;
+        cell.className = 'cell';
+        cell.textContent = '';
+        const fadeProcess = () => new Promise(resolve => {
+            this.animateFade().then(()=>this.node.remove());
             setTimeout(() => {
                 resolve();
             }, 50);
-            animation.play()
         });
         this.onAnimate(fadeProcess);
     }
@@ -479,6 +522,39 @@ const app = () =>{
         const avCells = [];
         moves.forEach(it=>it.forEach(jt=>avCells.push(jt)));
 
+        gamenModel.removedLines?.forEach((line)=>{
+            const lineAnimations = [];
+            const prevCells = [...cells];
+            for (let i=0; i< gamenModel.fieldLength; i++){
+                const fadeAnimation = ()=>prevCells[line*gamenModel.fieldLength + i].animateFade().then(()=>{console.log('empty animated' + i)});
+                cells[line*gamenModel.fieldLength + i] = undefined;
+                const timer = ()=> new Promise(resolve=>{
+                    setTimeout(()=>{
+                        console.log('empty timer ' + i)
+                        resolve()
+                    }, 50);
+                })
+                const animation = //()=>Promise.resolve().then(()=>{console.log('empty test', i, line)});
+                (i == gamenModel.fieldLength - 1) ? fadeAnimation : ()=>Promise.race([fadeAnimation(), timer()])
+                lineAnimations.push(animation);
+            }
+            
+            console.log('empty handle')
+            const resolveLine = async ()=>{
+                console.log('empty resolve')
+                for (const lineAnimation of lineAnimations){
+                    await lineAnimation();
+                }
+                for (let i=0; i< gamenModel.fieldLength; i++) {
+                    prevCells[line*gamenModel.fieldLength + i].node.remove();
+                }
+                console.log('empty resolve end')
+            }
+            animations.push(resolveLine);
+        });
+
+        cells = cells.filter(it=>it);
+
         const forRemove = [];
         cells.forEach((cell, cellIndex)=>{
             if (gamenModel.field.length<=cellIndex){
@@ -499,6 +575,9 @@ const app = () =>{
             const betweenH = moves.find(it=>i> it[0] && i<it[1] && it[2] == 'h') != undefined
             const betweenV = moves.find(it=>i> it[0] && i<it[1] && it[2] && (it[0] % 9 == i % 9) && it[2]== 'v') != undefined;
             cell.update(gamenModel.field[i], i == gamenModel.selected, avCells.includes(i), betweenH, betweenV)
+            cell.onClick = ()=>{
+                gamenModel.select(i);
+            }
         }
 
         gamenModel.field.forEach((it, i)=>{

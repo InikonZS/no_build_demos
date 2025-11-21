@@ -31,6 +31,23 @@ class GamenModel {
         this.onUpdate();
     }
 
+    revertMove(){
+        if (!this.lastMove){
+            return;
+        }
+        this.removedLines.forEach(it=>{
+            for (let i = 0; i< this.fieldLength; i++){
+                this.field.splice(it*9, 0, '');
+            }
+        });
+        this.field[this.lastMove[0]] = this.lastMove[2];
+        this.field[this.lastMove[1]] = this.lastMove[3];
+        this.score -= this.lastMove[4];
+        this.removedLines = [];
+        this.lastMove = undefined;
+        this.onUpdate();
+    }
+
     select(index){
         if (this.isFailed){
             return;
@@ -665,12 +682,20 @@ const app = () =>{
     topButtons.className = 'topButtons';
     centerContainer.append(topButtons);
 
-    const addbutton = document.createElement('div');
-    addbutton.className = 'addButton';
-    addbutton.textContent = 'Add'
-    topButtons.append(addbutton);
-    addbutton.onclick = ()=>{
+    const addButton = document.createElement('div');
+    addButton.className = 'addButton';
+    addButton.textContent = 'Add'
+    topButtons.append(addButton);
+    addButton.onclick = ()=>{
         gamenModel.addNums();
+    }
+
+    const revertButton = document.createElement('div');
+    revertButton.className = 'addButton';
+    revertButton.textContent = 'Undo'
+    topButtons.append(revertButton);
+    revertButton.onclick = ()=>{
+        gamenModel.revertMove();
     }
 
     this.scoreView = new ScoreView(topButtons);
@@ -753,6 +778,11 @@ const app = () =>{
                 scoreGhost.fly(moveScore, ghost.node, scoreView.scoreCount).then(()=>{
                     scoreView.applyScore(gamenModel.score)
                 });
+            }
+        }
+        if (!gamenModel.lastMove){
+            if (gamenModel.score != scoreView.value){
+                scoreView.applyScore(gamenModel.score);
             }
         }
         const moves = gamenModel.findMoves();

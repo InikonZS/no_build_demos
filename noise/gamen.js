@@ -3,6 +3,7 @@ class GamenModel {
     fieldLength;
 
     constructor(){
+        this.score = 0;
         const field = [];
         this.fieldLength = 9;
         for (let i = 0; i<20; i++){
@@ -27,7 +28,14 @@ class GamenModel {
         } else {
             if (!(this.selected == index) && (this.field[this.selected] == this.field[index] || this.field[this.selected] + this.field[index] == 10) && (this.checkVertical(this.selected, index) || this.checkHorizontal(this.selected, index))){
                 //const lastSelected = this.selected;
-                this.lastMove = [index, this.selected, this.field[index], this.field[this.selected]];
+                let moveScore = 0;
+                if (this.field[index] == this.field[this.selected]){
+                    moveScore = this.field[index] == 5 ? 3 : 2;
+                } else {
+                    moveScore = 1;
+                }
+                this.score+=moveScore;
+                this.lastMove = [index, this.selected, this.field[index], this.field[this.selected], moveScore];
                 this.field[this.selected] = '';
                 this.field[index] = '';
                 this.selected = null;
@@ -408,6 +416,119 @@ class CellView {
     }
 }
 
+class ScoreView {
+    constructor(parent){
+        this.value = 0;
+        const scoreWrap = document.createElement('div');
+        scoreWrap.className = 'scoreWrap';
+        parent.append(scoreWrap);
+        this.node = scoreWrap;
+        
+        const scoreCount = document.createElement('div');
+        scoreCount.className = 'scoreCount';
+        scoreCount.textContent = this.value;
+        scoreWrap.append(scoreCount);
+        this.scoreCount = scoreCount;
+
+        const scoreTitle = document.createElement('div');
+        scoreTitle.className = 'scoreTitle';
+        scoreTitle.textContent = 'Score';
+        scoreWrap.append(scoreTitle);
+    }
+
+    animateApply(){
+        return new Promise(resolve => {
+            const animation = this.scoreCount.animate([
+                {
+                    transform: `scale(1)`,
+                    offset: 0
+                },
+                {
+                    transform: `scale(0.8)`,
+                    offset: 0.25
+                },
+                {
+                    transform: `scale(1.2)`,
+                    offset: 0.5
+                },
+                {
+                    transform: `scale(1)`,
+                    offset: 1
+                },
+            ], {
+                duration: 300,
+                iterations: 1,
+            });
+            animation.onfinish = () => {
+                resolve();
+            }
+            animation.play()
+        })
+    }
+
+    applyScore(value){
+        this.value = value;
+        this.scoreCount.textContent = this.value;
+        this.animateApply();
+    }
+}
+
+class ScoreGhost {
+    constructor(parent){
+        this.value = 0;
+        const score = document.createElement('div');
+        score.className = 'scoreGhost';
+        parent.append(score);
+        this.node = score;
+    }
+
+    fly(value, from, to){
+        this.node.textContent = `+${value}`;
+        const fromBounds = from.getBoundingClientRect();
+        const toBounds = to.getBoundingClientRect();
+        const parentBounds = this.node.parentElement.getBoundingClientRect();
+        const fromPos = {
+            x: fromBounds.x - parentBounds.x,
+            y: fromBounds.y - parentBounds.y,
+        }
+        const toPos = {
+            x: toBounds.x - parentBounds.x - 10,
+            y: toBounds.y - parentBounds.y,
+        }
+        return new Promise(resolve => {
+            const animation = this.node.animate([
+                {
+                    transform: `translate(${fromPos.x}px, ${fromPos.y}px)`,
+                    offset: 0
+                },
+                {
+                    transform: `translate(${(fromPos.x + toPos.x) /2 + Math.random() * 15}px, ${(fromPos.y + toPos.y) /2 + Math.random() * 15}px) scale(1)`,
+                    offset: 0.4
+                },
+                {
+                    transform: `translate(${toPos.x}px, ${toPos.y}px) scale(1.5)`,
+                    opacity: 1,
+                    offset: 0.8
+                },
+                {
+                    transform: `translate(${toPos.x}px, ${toPos.y}px) scale(0.3)`,
+                    opacity: 0,
+                    offset: 1
+                },
+            ], {
+                duration: 700,
+                iterations: 1,
+            });
+            animation.onfinish = () => {
+                //this.node.style.transform = 'scale(1)';
+                this.node.remove();
+                resolve();
+            }
+            animation.play()
+        })
+    }
+}
+
 const app = () =>{
     const animations = [];
     let resolving = false;
@@ -451,6 +572,8 @@ const app = () =>{
         gamenModel.addNums();
     }
 
+    this.scoreView = new ScoreView(topButtons);
+
     const fieldWrapper = document.createElement('div');
     fieldWrapper.className = 'fieldWrapper';
     centerContainer.append(fieldWrapper);
@@ -464,6 +587,7 @@ const app = () =>{
     const update = ()=>{
 
         if (gamenModel.lastMove){
+            const moveScore = gamenModel.lastMove[4];
             if (((gamenModel.lastMove[0] % 9) != (gamenModel.lastMove[1] % 9)) && (Math.floor(gamenModel.lastMove[0] / 9) != Math.floor(gamenModel.lastMove[1] / 9))){
                 const ghostLeft = new GhostCell(fieldWrapper);
                 const start = Math.min(gamenModel.lastMove[0], gamenModel.lastMove[1])
@@ -502,6 +626,10 @@ const app = () =>{
                     //animation();
                 };
                 ghostRight.fadeOut();
+                const scoreGhost = new ScoreGhost(appWrapper);
+                scoreGhost.fly(moveScore, ghostRight.node, scoreView.scoreCount).then(()=>{
+                    scoreView.applyScore(gamenModel.score)
+                });
             } else {
                 const ghost = new GhostCell(fieldWrapper);
                 ghost.setPositions(
@@ -516,6 +644,10 @@ const app = () =>{
                     //animation();
                 };
                 ghost.fadeOut();
+                const scoreGhost = new ScoreGhost(appWrapper);
+                scoreGhost.fly(moveScore, ghost.node, scoreView.scoreCount).then(()=>{
+                    scoreView.applyScore(gamenModel.score)
+                });
             }
         }
         const moves = gamenModel.findMoves();
@@ -526,6 +658,7 @@ const app = () =>{
             const lineAnimations = [];
             const prevCells = [...cells];
             for (let i=0; i< gamenModel.fieldLength; i++){
+                prevCells[line*gamenModel.fieldLength + i].update('', false, false, false, false);
                 const fadeAnimation = ()=>prevCells[line*gamenModel.fieldLength + i].animateFade().then(()=>{console.log('empty animated' + i)});
                 cells[line*gamenModel.fieldLength + i] = undefined;
                 const timer = ()=> new Promise(resolve=>{

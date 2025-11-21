@@ -11,19 +11,27 @@ body{
     flex-direction: column;
     align-items: center;
     min-width: 380px;
-    position: relative;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    top: 0;
+    left: 0;
 }
 
 .centerContainer{
     display: flex;
     flex-direction: column;
     gap: 12px;
+    height: 100%;
+    padding: 10px 0px;
 }
 
 .topButtons{
     display: flex;
     width: 100%;
     gap: 10px;
+    padding: 0px 10px;
 }
 
 .addButton{
@@ -63,6 +71,132 @@ body{
     font-size: 18px;
     top: 0;
     left: 0;
+}
+
+.popup{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    background-color: #fff;
+    padding: 20px;
+    max-width: 320px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 230px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    animation: popupIn 800ms linear forwards;
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0);
+    justify-content: space-between;
+}
+
+@keyframes popupIn{
+    0%{
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0);
+    }
+    50%{
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.1);
+    }
+    75%{
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(0.9);
+    }
+    100%{
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+.popupStatus{
+    font-size: 60px;
+    animation: popupStatusIn 1000ms forwards;
+    animation-delay: 600ms;
+    opacity: 0;
+    transform: scale(3);
+}
+
+@keyframes popupStatusIn{
+    0%{
+        opacity: 0;
+        transform: scale(3);
+    }
+    100%{
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.popupScore {
+    font-size: 18px;
+    animation: popupScoreIn 1000ms forwards;
+    animation-delay: 800ms;
+    opacity: 0;
+    transform: scale(3);
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+}
+
+.popupScoreValue {
+    font-size: 36px;
+}
+
+.popupScoreLabel {
+    font-size: 18px;
+}
+
+@keyframes popupScoreIn{
+    0%{
+        opacity: 0;
+        transform: scale(3);
+    }
+    100%{
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.popupButtonPlay{
+    font-size: 18px;
+    animation: popupButtonIn 1000ms forwards;
+    animation-delay: 1000ms;
+    opacity: 0;
+    transform: scale(3);
+    border: 1px solid #ccc;
+    padding: 10px;
+    border-radius: 3px;
+    user-select: none;
+    cursor: default;
+    transition-duration: 200ms;
+}
+
+.popupButtonPlay:hover{
+    background-color: #cfc;
+}
+
+
+@keyframes popupButtonIn{
+    0%{
+        opacity: 0;
+        transform: scale(3);
+    }
+    100%{
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+
+.fieldScroll{
+    overflow-y: scroll;
+    overflow-x: hidden;
+    height: 100%;
+    padding: 0px 10px;
 }
 
 .fieldWrapper{

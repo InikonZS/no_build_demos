@@ -3,9 +3,17 @@ class GamenModel {
     fieldLength;
 
     constructor(){
-        this.score = 0;
-        const field = [];
         this.fieldLength = 9;
+        this.start();
+    }
+
+    start(){
+        this.removedLines = [];
+        this.lastMove = undefined;
+        this.score = 0;
+        this.isWin = false;
+        this.isFailed = false;
+        const field = [];
         for (let i = 0; i<20; i++){
             const splittedNum = i.toString().split('').map(it=>Number.parseInt(it));
             if (splittedNum.includes(0)){
@@ -18,7 +26,15 @@ class GamenModel {
         this.field = field;
     }
 
+    restart(){
+        this.start();
+        this.onUpdate();
+    }
+
     select(index){
+        if (this.isFailed){
+            return;
+        }
         this.removedLines = [];
         console.log(this.selected, index)
         //let result;
@@ -47,9 +63,21 @@ class GamenModel {
         }
         this.field.splice(this.getLastEmpty());
         this.removeEmptyLines();
-        console.log(this.field, this.getLastEmpty());
+        console.log(this.field, this.getLastEmpty(), this.field.length, Math.floor(this.field.length / this.fieldLength));
+        this.checkWin();
         this.onUpdate?.();
         //return result;
+    }
+
+    checkWin(){
+        if (this.field.length == 0){
+            this.isWin = true;
+            console.log('win');
+        }
+        if (Math.floor(this.field.length / this.fieldLength)>50){
+            this.isFailed = true;
+            console.log('failed');
+        }
     }
 
     checkCells(a, b){
@@ -94,6 +122,9 @@ class GamenModel {
     }
 
     addNums(){
+        if (this.isFailed){
+            return;
+        }
         this.removedLines = [];
         this.lastMove = undefined;
         this.selected = null;
@@ -103,6 +134,7 @@ class GamenModel {
         nums.forEach((it, i)=>{
             this.field[i+lastEmpty] = it;
         });
+        this.checkWin();
         this.onUpdate?.();
     }
 
@@ -368,15 +400,19 @@ class CellView {
         })
     }
 
-    fadeOut() {
+    fadeOut(force = false) {
         const cell = this.cellInner;
         cell.className = 'cell';
         cell.textContent = '';
         const fadeProcess = () => new Promise(resolve => {
             this.animateFade().then(()=>this.node.remove());
-            setTimeout(() => {
-                resolve();
-            }, 50);
+            if (force){
+                resolve()
+            } else {
+                setTimeout(() => {
+                    resolve();
+                }, 50);
+            }
         });
         this.onAnimate(fadeProcess);
     }
@@ -529,21 +565,86 @@ class ScoreGhost {
     }
 }
 
+class GamePopup {
+    constructor(parent){
+        const popup = document.createElement('div');
+        popup.className = 'popup';
+        parent.append(popup);
+        this.node = popup;
+
+        const status = document.createElement('div');
+        status.className = 'popupStatus';
+        popup.append(status);
+        this.status = status;
+
+        const scoreContainer = document.createElement('div');
+        scoreContainer.className = 'popupScore';
+        popup.append(scoreContainer);
+
+        const scoreLabel = document.createElement('div');
+        scoreLabel.textContent = 'Score:'
+        scoreLabel.className = 'popupScoreLabel';
+        scoreContainer.append(scoreLabel);
+
+        const scoreValue = document.createElement('div');
+        scoreValue.className = 'popupScoreValue';
+        scoreContainer.append(scoreValue);
+        this.score = scoreValue;
+    
+        const buttons = document.createElement('div');
+        buttons.className = 'popupButtons';
+        popup.append(buttons);
+
+        const buttonPlay = document.createElement('div');
+        buttonPlay.className = 'popupButtonPlay';
+        this.buttonPlay = buttonPlay;
+        popup.append(buttonPlay);
+        buttonPlay.onclick = ()=>{
+            this.onPlayClick?.();
+        }
+    }
+
+    hide(){
+        this.node.remove();
+    }
+
+    show(){
+
+    }
+}
+
+class WinPopup extends GamePopup{
+    constructor(parent){
+        super(parent);
+        this.status.textContent = 'Win';
+        this.buttonPlay.textContent = 'Play again'
+    }
+}
+
+class FailPopup extends GamePopup{
+    constructor(parent){
+        super(parent);
+        this.status.textContent = 'Fail';
+        this.buttonPlay.textContent = 'Try again'
+    }
+}
+
 const app = () =>{
+    window.rt = ()=>gamenModel.restart();
     const animations = [];
     let resolving = false;
     const resolveAnimations = async ()=>{
         if (resolving || animations.length == 0){
             return;
         }
-        console.log('start resolving')
+        //console.log('start resolving')
         while (animations[0]){
             const animation = animations.shift();
             await animation();
-            console.log('resolve', animations.length)
+            //console.log('resolve', animations.length)
         }
         resolving = false;
-        console.log('stop resolving')
+        //console.log('stop resolving')
         return true;
     }
     const gamenModel = new GamenModel();
@@ -574,9 +675,13 @@ const app = () =>{
 
     this.scoreView = new ScoreView(topButtons);
 
+    const fieldScroll = document.createElement('div');
+    fieldScroll.className = 'fieldScroll';
+    centerContainer.append(fieldScroll);
+
     const fieldWrapper = document.createElement('div');
     fieldWrapper.className = 'fieldWrapper';
-    centerContainer.append(fieldWrapper);
+    fieldScroll.append(fieldWrapper);
 
     let cells = [];
 
@@ -663,7 +768,7 @@ const app = () =>{
                 cells[line*gamenModel.fieldLength + i] = undefined;
                 const timer = ()=> new Promise(resolve=>{
                     setTimeout(()=>{
-                        console.log('empty timer ' + i)
+                        //console.log('empty timer ' + i)
                         resolve()
                     }, 50);
                 })
@@ -696,8 +801,8 @@ const app = () =>{
             //resolveAnimations();
         });
         console.log(forRemove);
-        forRemove.reverse().forEach(cellIndex=>{
-            cells[cellIndex].fadeOut();
+        forRemove.reverse().forEach((cellIndex, countIndex)=>{
+            cells[cellIndex].fadeOut(forRemove.length - countIndex>30);
             cells[cellIndex] = undefined;
         });
 
@@ -712,7 +817,7 @@ const app = () =>{
                 gamenModel.select(i);
             }
         }
-
+        
         gamenModel.field.forEach((it, i)=>{
             if (cells[i]){
                 cellUpdate(i);
@@ -730,6 +835,28 @@ const app = () =>{
                 cell.fadeIn();
             }
         });
+        console.log('check fail popup')
+        if (gamenModel.isFailed){
+            console.log('fail popup')
+            const failPopup = new FailPopup(appWrapper);
+            failPopup.onPlayClick = ()=>{
+                scoreView.applyScore(0);
+                failPopup.hide();   
+                gamenModel.restart();
+            }
+            failPopup.score.textContent = gamenModel.score;
+            failPopup.show();
+        }
+        if (gamenModel.isWin){
+            const winPopup = new WinPopup(appWrapper);
+            winPopup.onPlayClick = ()=>{
+                scoreView.applyScore(0);
+                winPopup.hide()
+                gamenModel.restart();
+            }
+            winPopup.score.textContent = gamenModel.score;
+            winPopup.show();
+        }
         resolveAnimations();
     }
     update();

@@ -387,17 +387,30 @@ const app = () =>{
         console.log(gamenModel);
         update()
     }
+
+    const appWrapper = document.createElement('div');
+    appWrapper.className = 'appWrapper';
+    document.body.append(appWrapper);
+
+    const centerContainer = document.createElement('div');
+    centerContainer.className = 'centerContainer';
+    appWrapper.append(centerContainer);
+
+    const topButtons = document.createElement('div');
+    topButtons.className = 'topButtons';
+    centerContainer.append(topButtons);
+
     const addbutton = document.createElement('div');
-    addbutton.className = 'addbutton';
-    addbutton.textContent = 'add'
-    document.body.append(addbutton);
+    addbutton.className = 'addButton';
+    addbutton.textContent = 'Add'
+    topButtons.append(addbutton);
     addbutton.onclick = ()=>{
         gamenModel.addNums();
     }
 
     const fieldWrapper = document.createElement('div');
     fieldWrapper.className = 'fieldWrapper';
-    document.body.append(fieldWrapper);
+    centerContainer.append(fieldWrapper);
 
     let cells = [];
 

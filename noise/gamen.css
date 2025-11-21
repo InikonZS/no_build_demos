@@ -2,15 +2,51 @@
     box-sizing: border-box;
 }
 
+body{
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.appWrapper{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 380px;
+}
+
+.centerContainer{
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.topButtons{
+    display: flex;
+    width: 100%;
+}
+
+.addButton{
+    border: 1px solid #ccc;
+    padding: 10px;
+    border-radius: 3px;
+    user-select: none;
+    cursor: default;
+    transition-duration: 200ms;
+}
+
+.addButton:hover{
+    background-color: #cfc;
+}
+
 .fieldWrapper{
     --cols: 9;
     --gap: 5px;
-    --fieldWidth: 250px;
+    --fieldWidth: 350px;
     --cellSize: calc(((var(--fieldWidth) - (var(--gap) * (var(--cols) - 1))) / var(--cols)));
     gap: var(--gap);
     display: flex;
     flex-wrap: wrap;
     max-width: var(--fieldWidth);
+    min-width: var(--fieldWidth);
     position: relative;
 }
 

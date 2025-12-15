@@ -1,0 +1,81 @@
+*{
+    box-sizing: border-box;
+}
+
+.root{
+
+}
+
+.atContainerDemo{
+    display: flex;
+    width: 100%;
+    gap: 20px;
+}
+
+.atContainer{
+    width: 100%;
+    background-color: rgb(84, 160, 248);
+    container-type: inline-size;
+    container-name: bannerBig; 
+    padding: 10px;
+}
+
+.atContainerBig{
+    width: 60%;
+}
+
+.atContainerSmall{
+    width: 40%;
+}
+
+.atContainerContent{
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    --cols: 3;
+    --gap: 10px;
+    gap: var(--gap);
+    height: 100%;
+}
+
+.atContainerContentItem{
+    border: 1px solid rgb(152, 200, 255);
+    width: calc(((100% - (var(--gap) * (var(--cols) - 1))) / var(--cols)));
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #fff;
+}
+
+@container bannerBig (max-width: 300px) {
+  .atContainerContent {
+    --gap: 5px;
+    --cols: 1;
+  }
+}
+
+
+.baseSizeItem{
+    border: 1px solid #000;
+    --baseSize: 1;
+    width: calc( var(--baseSize) * 100px);
+    height: calc( var(--baseSize) * 100px);
+    font-size: calc( var(--baseSize) * 20px);
+}
+
+.displayDemo{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.displayDemoRow{
+    display: flex;
+    gap: 5px;
+    /*display: contents*/
+}
+
+.displayDemoItem{
+    width: 100%;
+    border: 1px solid #000;
+}

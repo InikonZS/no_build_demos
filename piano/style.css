@@ -1,0 +1,58 @@
+*{
+  box-sizing: border-box;
+}
+
+.piano_wrapper{
+  width: 100%;
+  justify-content: center;
+  display: flex;
+}
+
+.piano-button_sharp-wrapper{
+  width: 0px;
+  height: 200px;
+  position: relative;
+  z-index: 2;
+}
+
+.piano-button_white-wrapper{
+  height: 200px;
+  position: relative;
+  z-index: 1;
+}
+
+.piano-button_sharp{
+  width: 20px;
+  height: 140px;
+  background-color: #444;
+  border: solid 1px #000;
+  position: absolute;
+  left: -10px;
+}
+.piano-button_white{
+  width: 30px;
+  height: 200px;
+  background-color: #ccc;
+  border: solid 1px #000;
+}
+
+.piano-button_sharp:hover{
+  background-color: #777;  
+}
+
+.piano-button_white:hover{
+  background-color: #eee;  
+}
+
+.piano-button__active{
+  background-color: #99f;  
+}
+.piano-button__active:hover{
+  background-color: #99f;  
+}
+
+.editor_wrapper{
+  display: flex;
+  justify-content: center;
+  padding: 10px;
+}

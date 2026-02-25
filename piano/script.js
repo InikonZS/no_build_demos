@@ -161,11 +161,11 @@ class AMSREditor extends Control{
     this.points = [
       new Point(-2500000, 0),
       new Point(0, 0),
-      new Point(0, 200),
-      new Point(2500, 200),
-      new Point(5500, 50),
-      new Point(7500, 10),
-      new Point(25000, 0),
+      new Point(10, 200),
+      new Point(4810, 91),
+      new Point(15470, 82),
+      new Point(19760, 17),
+      new Point(57460, 0),
       new Point(2500000, 0),
     ];
     this.node.onmousemove = (e)=>{
@@ -195,6 +195,7 @@ class AMSREditor extends Control{
   }
 
   render(){
+    //console.log(this.points)
     this.context.fillStyle = '#000';
     this.context.fillRect(0,0, this.context.canvas.width, this.context.canvas.height);
     for (let i = 0; i<100000; i+=100){
@@ -255,6 +256,6 @@ editor.render();
 let octa = '010100101010';
 
 for (let i=0; i<53; i++){
-  let key = new PianoKey(piano.node, octa[i % octa.length]=='1' ? true : false, 82 * (2 ** (i/12)), hots[i]);
+  let key = new PianoKey(piano.node, octa[i % octa.length]=='1' ? true : false, 0.75 * 82 * (2 ** (i/12)), hots[i]);
   piano.addKey(key);
 }

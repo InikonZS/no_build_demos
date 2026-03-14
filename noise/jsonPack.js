@@ -28,6 +28,7 @@ inp.onchange = ()=>{
         const obj = JSON.parse(text);
         const encoded = convert(obj);
         const dicted = compressDictionary(encoded);
+        console.log(dicted)
         const packed = packBase(dicted);
         console.log(packed)
     })
@@ -41,7 +42,7 @@ const convert = (obj)=>{
     const iterateObject = (obj, parentKey)=>{
         if (parentKey){
             strings.push(parentKey);
-            structure.push('s');
+            //structure.push('s');
         }
         if (obj && typeof obj == 'object' && !Array.isArray(obj)){
             structure.push('{')
@@ -56,7 +57,8 @@ const convert = (obj)=>{
             obj.forEach((child)=>{
                 iterateObject(child);
             });
-            structure.push(']')
+            //structure.push(']')
+            structure.push('}')
         }
 
         if (typeof obj == 'string'){
@@ -94,13 +96,14 @@ const unconvert = (_encoded)=>{
     encoded.structure.forEach(it=>{
         if (it == '{'){
             if (currentParent && typeof currentParent == 'object' && !Array.isArray(currentParent)){
-                if (key){
+                //if (key){
+                const key = encoded.strings.pop();
                     const obj = {};
                     currentParent[key] = obj;
                     parentStack.push(obj);
                     currentParent = parentStack[parentStack.length - 1];
-                    key = '';
-                }
+                    //key = '';
+                //}
             } else
 
             if (currentParent && Array.isArray(currentParent)){
@@ -122,13 +125,14 @@ const unconvert = (_encoded)=>{
         }
         if (it == '['){
             if (currentParent && typeof currentParent == 'object' && !Array.isArray(currentParent)){
-                if (key){
+                //if (key){
+                    const key = encoded.strings.pop();
                     const obj = [];
                     currentParent[key] = obj;
                     parentStack.push(obj);
                     currentParent = parentStack[parentStack.length - 1];
-                    key = '';
-                }
+                    //key = '';
+                //}
             } else
 
             if (currentParent && Array.isArray(currentParent)){
@@ -150,12 +154,13 @@ const unconvert = (_encoded)=>{
         }
         if (it == 's'){
             if (currentParent && typeof currentParent == 'object' && !Array.isArray(currentParent)){
-                if (!key){
-                    key = encoded.strings.pop();
-                } else {
+                //if (!key){
+                    //key = encoded.strings.pop();
+                //} else {
+                    const key = encoded.strings.pop();
                     currentParent[key] = encoded.strings.pop();
-                    key = '';
-                }
+                   // key = '';
+                //}
             }
 
             if (currentParent && Array.isArray(currentParent)){
@@ -165,8 +170,9 @@ const unconvert = (_encoded)=>{
         if (it == 'd'){
             if (currentParent && typeof currentParent == 'object' && !Array.isArray(currentParent)){
                 //if (key){
+                const key = encoded.strings.pop();
                     currentParent[key] = encoded.numbers.pop();
-                    key = '';
+                   // key = '';
                 //}
             }
             if (currentParent && Array.isArray(currentParent)){
@@ -176,8 +182,9 @@ const unconvert = (_encoded)=>{
         if (it == 'n'){
             if (currentParent && typeof currentParent == 'object' && !Array.isArray(currentParent)){
                 //if (key){
+                const key = encoded.strings.pop();
                     currentParent[key] = null;
-                    key = '';
+                    //key = '';
                 //}
             }
             if (currentParent && Array.isArray(currentParent)){
@@ -305,6 +312,7 @@ function uint16ToBase64(_arr){
 }
 
 console.log(uint16FromBase64(uint16ToBase64([1,2,3,4,5])))
+const B64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
 const unpackBase = (packed)=>{
     const B64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
@@ -337,6 +345,173 @@ const unpackBase = (packed)=>{
         structure: structure
     }
     return result;
+}
+
+const packPair = (arr, limit = 1)=>{
+    const dictionaryCountMap = {};
+    for (let i = 0; i< arr.length - 1; i++){
+        const pair = arr[i] + arr[i+1];
+        if (!dictionaryCountMap[pair]){
+            dictionaryCountMap[pair] = {
+                key: pair,
+                count: 0,
+                positions: []
+            }
+        }
+        if (dictionaryCountMap[pair].positions[dictionaryCountMap[pair].positions.length-1] == i-1){
+            //self affected
+        } else {
+            dictionaryCountMap[pair].count++;
+            dictionaryCountMap[pair].positions.push(i);
+        }
+    }
+
+    const dictionaryList = [];
+    Object.entries(dictionaryCountMap).sort((a, b)=>b[1].count - a[1].count).forEach((it)=>{
+        if (it[1].count <= limit){
+            return;
+        }
+        dictionaryList.push(it[1]);
+    });
+
+    console.log(dictionaryList)
+
+    const resultArr = [...arr];
+    const affectedArr = arr.map(()=>false);
+    dictionaryList.forEach(it=>{
+        //dry
+        let discount = 0;
+        it.positions.forEach(jt=>{
+            if (affectedArr[jt] || affectedArr[jt + 1]){
+                discount++;
+                return;
+            }
+        })
+        //replace
+        it.positions.forEach(jt=>{
+            if ((it.count - discount)<=limit){
+                return;
+            }
+            if (affectedArr[jt] || affectedArr[jt + 1]){
+                return;
+            }
+            resultArr[jt] = it.key;
+            resultArr[jt + 1] = undefined;
+            affectedArr[jt] = true;
+            affectedArr[jt + 1] = true;
+            //resultArr.splice(jt, 2, it.key)
+        });
+    });
+    return resultArr.filter(it=>it!=undefined);
+}
+
+const packPairIterated = (arr, limits=[1])=>{
+    let result = arr;
+    limits.forEach(limit=>{
+        result = packPair(result, limit)
+    });
+    return result;
+}
+
+const huffman = (str)=>{
+    const dictionaryCountMap = {};
+    const buf = typeof str == 'string' ? str.split('') : str; 
+    buf.forEach(it=>{
+        if (dictionaryCountMap[it] == undefined){
+            dictionaryCountMap[it] = 0;
+        }
+        dictionaryCountMap[it]++;
+    });
+    
+    const hnodes = [];
+    const hlinks = [];
+    Object.entries(dictionaryCountMap).forEach(it=>{
+        const hnode = {
+            key: it[0],
+            count: it[1],
+            value: undefined,
+            children: undefined,
+            parent: undefined
+        };
+        hlinks.push(hnode);
+        hnodes.push(hnode);
+    })
+    
+    const groupHNode = (hnodes) => {
+        if (hnodes.length < 2) return true;
+        hnodes.sort((a, b)=>b.count - a.count);
+        const min1 = hnodes.pop();
+        min1.value = 1;
+        const min2 = hnodes.pop();
+        min2.value = 0;
+        const hnode = {
+            key: undefined,
+            count: min1.count + min2.count,
+            value: undefined,
+            children: [
+                min1,
+                min2
+            ]
+        };
+        min1.parent = hnode;
+        min2.parent = hnode;
+        hnodes.push(
+            hnode
+        )
+    }
+
+    for(i=0; i<10000; i++){
+        if (groupHNode(hnodes)){
+            break;
+        }
+    }
+
+    const hcodes = {};
+    hlinks.forEach(it=>{
+        let current = it;
+        const code = [];
+        while(current){
+            if (current.value != undefined){
+                code.push(current.value);
+            }
+            current = current.parent;
+        };
+        hcodes[code.reverse().join('')] = it.key;
+
+    });
+
+    console.log(hnodes, hcodes);
+    return hcodes
+}
+
+const huffmanEncode = (str)=>{
+    const hcodes = huffman(str);
+    const result = [];
+    const enccodes = {};
+    Object.keys(hcodes).forEach(it=>{
+        enccodes[hcodes[it]]=it;
+    })
+    const bitbuf = [];
+    const buf = typeof str == 'string' ? str.split('') : str; 
+    buf.forEach(it=>{
+        bitbuf.push(...enccodes[it].split(''));
+    });
+
+    for (let i = 0; i < Math.floor(bitbuf.length / 6) * 6; i+=6){
+        const val = Number.parseInt(bitbuf.slice(i, i+6).join(''), 2);
+        result.push(B64[val]);
+    }
+
+    const lastSym = bitbuf.slice(Math.floor(bitbuf.length / 6) * 6, bitbuf.length);
+    let correction = 0;
+    if (lastSym.length){
+        while(lastSym.length<6){
+            lastSym.push(0);
+            correction += 1;
+        }
+        result.push(B64[Number.parseInt(lastSym.join(''), 2)]);
+    }
+    return {result, correction, hcodes};
 }
 
 const cv = convert({

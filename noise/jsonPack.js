@@ -5,6 +5,8 @@ const processFile=(selectedFile, onReady)=>{
     const reader = new FileReader();
     reader.onload = ()=>{
         console.log('loaded');
+        window.tst = reader.result;
+        //console.log(reader.result);
         onReady(reader.result);
     }
     reader.onloadstart = ()=>{
@@ -235,6 +237,7 @@ const decompressDictionary = (compressed)=>{
     }
 }
 
+
 const packBase = (compressed)=>{
     const B64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
     const structureBase64 = [];
@@ -259,13 +262,32 @@ const packBase = (compressed)=>{
             chunk = 0;
         }
     })
+    let k = 8;
     const result = {
+        //dictionary: huffmanFinal(packPairIterated(JSON.stringify(compressed.dictionary).split(''), [22, 25, 20, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10])),//compressed.dictionary.join(','),
         dictionary: compressed.dictionary.join(','),
-        strings: uint16ToBase64(compressed.strings),
-        numbers: float32ToBase64(compressed.numbers),
-        structure: structureBase64.join('')
+        strings: huffmanFinal(JSON.stringify(compressed.strings)),
+        //10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10
+        numbers: huffmanFinal(packPairIterated(numCountMap(compressed.numbers, 2).toString().split('')/*compressed.numbers.toString().split('')*/, [2002, 125,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k])),
+        structure: huffmanFinal(packPairIterated(structureBase64, [22, 25, 20, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10]))
+        //strings: uint16ToBase64(compressed.strings),
+        //numbers: float32ToBase64(compressed.numbers),
+        //structure: structureBase64.join('')
     }
-    return result;
+    console.log('final',JSON.stringify(result).length);
+    return result;//huffmanFinal(packPairIterated(JSON.stringify(result).split(''), [22, 25, 20, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10]));
+}
+
+const huffmanFinal = (arr, cnt=0)=>{
+    const res = huffmanEncode(arr);
+    return {
+        correction: res.correction,
+        hcodes: {
+            codes: cnt >= 2 ? Object.keys(res.hcodes).join(',') : huffmanFinal(Object.keys(res.hcodes).join(',').split(''), cnt+1),
+            value: cnt >= 2 ? JSON.stringify(Object.values(res.hcodes)) : huffmanFinal(packPairIterated(JSON.stringify(Object.values(res.hcodes)).split(''), [22, 25, 20, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10]), cnt+1),
+        },//cnt >= 2 ?JSON.stringify(res.hcodes) : huffmanFinal(packPairIterated(JSON.stringify(res.hcodes).split(''), [22, 25, 20, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10]), cnt+1),
+        result: res.result.join('')
+    }
 }
 
 function float32FromBase64(str){
@@ -347,9 +369,12 @@ const unpackBase = (packed)=>{
     return result;
 }
 
-const packPair = (arr, limit = 1)=>{
+const packPair = (arr, limit = 1, iteration = 1)=>{
     const dictionaryCountMap = {};
     for (let i = 0; i< arr.length - 1; i++){
+        if (arr[i].length < iteration && arr[i].length < iteration){
+            continue;
+        }
         const pair = arr[i] + arr[i+1];
         if (!dictionaryCountMap[pair]){
             dictionaryCountMap[pair] = {
@@ -407,10 +432,35 @@ const packPair = (arr, limit = 1)=>{
 
 const packPairIterated = (arr, limits=[1])=>{
     let result = arr;
-    limits.forEach(limit=>{
-        result = packPair(result, limit)
+    limits.forEach((limit, i)=>{
+        result = packPair(result, limit, i+1)
     });
     return result;
+}
+
+const numCountMap = (arr, limit=1)=>{
+    const dictionaryCountMap = {};
+    arr.forEach(it=>{
+        if (dictionaryCountMap[it] == undefined){
+            dictionaryCountMap[it] = 0;
+        }
+        dictionaryCountMap[it]++;
+    });
+
+    const dictionaryIdMap = {};
+    const dictionaryList = [];
+    Object.entries(dictionaryCountMap).sort((a, b)=>b[1] - a[1]).forEach((it)=>{
+        dictionaryIdMap[it[0]] = dictionaryList.length;
+        dictionaryList.push({
+            key: it[0],
+            count: it[1]
+        });
+    });
+    
+    const fixedList = dictionaryList.filter(it=>dictionaryCountMap[it.key]>limit);
+    const result = arr.map(it=>dictionaryCountMap[it] > limit ? dictionaryIdMap[it]: '_'+it);
+    console.log(dictionaryList, result, [...result, ...fixedList.map(it=>Number.parseFloat(it.key))], fixedList)
+    return [...result, ...fixedList.map(it=>Number.parseFloat(it.key))];
 }
 
 const huffman = (str)=>{
@@ -511,6 +561,12 @@ const huffmanEncode = (str)=>{
         }
         result.push(B64[Number.parseInt(lastSym.join(''), 2)]);
     }
+    const tableLen = JSON.stringify(hcodes).length;
+    const huffLen = result.join('').length;
+    const total = tableLen + huffLen;
+    const source = buf.join('').length;
+    const compressed = (total / source * 100).toFixed(4);
+    console.log('eff:', 't:'+tableLen,'+ d:'+ huffLen +'='+(huffLen+tableLen), source, compressed+'%')
     return {result, correction, hcodes};
 }
 
@@ -525,7 +581,7 @@ const cv = convert({
     },
     nl: null
 });
-
+/*
 const compressed = compressDictionary(cv);
 console.log(compressed)
 const decompressed = decompressDictionary(compressed);
@@ -548,4 +604,4 @@ console.log(unconvert( convert({
     },
     nl: null
 })))
-
+*/

@@ -235,7 +235,7 @@ const occupied = new Array(arr.length).fill(false)
 function applyReplacements(arr, _accepted, linkPref = '0'){
 
     const startMap = {}
-    const accepted = _accepted.filter(it=>it.positions.length > 10 || it.len > 10)
+    const accepted = _accepted//_accepted.filter(it=>it.positions.length > 10 || it.len > 10)
     accepted.forEach((block, blockId)=>{
 
         block.positions.forEach(pos=>{
@@ -269,7 +269,65 @@ function applyReplacements(arr, _accepted, linkPref = '0'){
         result.push(arr[i])
 
     }
-    const next =  [...result, ...contents, ...contentLen, contentLen.length];
+    const next =  encodeRepeats(result, contents, contentLen, linkPref)//[...result, ...contents, ...contentLen, contentLen.length, linkPref];
     console.log('enc',next)
     return {result, next}
 }
+
+function encodeRepeats(result, contents, contentLen, linkPref){
+    if (linkPref == '0'){
+        return [...result, '0-0', ...contents, ...contentLen, contentLen.length, linkPref];
+    } else {
+        return [...result, ...contents, ...contentLen, contentLen.length, linkPref];
+    }
+}
+
+function decodeRepeats(data){
+    const linkPref = data.pop().toString();
+    console.log(linkPref);
+    if (linkPref == '0-0'){
+        return [data, true];
+    };
+    const contentLenlength = data.pop();
+    const contentLen = data.splice(data.length - contentLenlength, contentLenlength).reverse();
+
+    const contents = [];
+    contentLen.forEach(it=>{
+        contents.push(data.splice(data.length - it, it));
+    })
+    contents.reverse();
+    console.log(contents, contentLenlength, contentLen)
+    const result = [];
+    console.log(data)
+    data.forEach(it=>{
+        const stringed = it.toString();
+        if (stringed.startsWith(linkPref) && !stringed.includes('.') && stringed.length > linkPref.length && (stringed != '0-0')){
+            const linkNum = stringed.slice(linkPref.length);
+            const linkData = contents[Number.parseInt(linkNum)];
+            if (linkData==undefined){
+                throw new Error(linkNum, stringed)
+            }
+            linkData.forEach(jt=>result.push(jt))
+        } else {
+            /*if (typeof it == 'string'){
+                console.log(it, stringed.startsWith(linkPref), !stringed.includes('.'), stringed.length > linkPref.length, (stringed != '0-0'));
+            }*/
+            result.push(it)
+        }
+    })
+    return [result, false]
+}
+
+function decodeRepeatsRec(data){
+    let stepData = data;
+    for (let i=0; i<1000; i++){
+        const [res, fin] = decodeRepeats(stepData);
+        stepData = res;
+        if (fin){
+            return res;
+        }
+    }
+}
+
+const t1 = [121, 222, 333, 121, 121, 222, 333, 125, 999, 32, 24, 18, 55, 32, 24, 888, 121, 222, 333, 125, 999, 32, 24, 18, 55, 121, 222, 333, 125, 999, 32, 24, 18, 55, 121, 222, 333, 125, 999, 32, 24, 18, 55]
+///['00', 121, '00', 125, 999, '01', 18, 55, '01', 888, 121, 222, 333, 32, 24, 3, 2, 2, '0']

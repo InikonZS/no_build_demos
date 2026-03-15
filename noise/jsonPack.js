@@ -266,9 +266,9 @@ const packBase = (compressed)=>{
     const result = {
         //dictionary: huffmanFinal(packPairIterated(JSON.stringify(compressed.dictionary).split(''), [22, 25, 20, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10])),//compressed.dictionary.join(','),
         dictionary: compressed.dictionary.join(','),
-        strings: huffmanFinal(JSON.stringify(compressed.strings)),
+        strings: huffmanFinal(/*JSON.stringify(compressed.strings)*/ findRepeatsRec(compressed.strings, 10).join(',').split('')),
         //10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10
-        numbers: huffmanFinal(packPairIterated(numCountMap(compressed.numbers, 2).toString().split('')/*compressed.numbers.toString().split('')*/, [2002, 125,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k])),
+        numbers: huffmanFinal(packPairIterated(findRepeatsRec(compressed.numbers, 10).join(',').split('')/*numCountMap(compressed.numbers, 2).toString().split('')*//*compressed.numbers.toString().split('')*/, [800, 125,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k])),
         structure: huffmanFinal(packPairIterated(structureBase64, [22, 25, 20, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10]))
         //strings: uint16ToBase64(compressed.strings),
         //numbers: float32ToBase64(compressed.numbers),

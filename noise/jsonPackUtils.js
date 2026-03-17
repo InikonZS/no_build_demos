@@ -235,7 +235,8 @@ const occupied = new Array(arr.length).fill(false)
 function applyReplacements(arr, _accepted, linkPref = '0'){
 
     const startMap = {}
-    const accepted = _accepted//_accepted.filter(it=>it.positions.length > 10 || it.len > 10)
+    //const accepted = _accepted//_accepted.filter(it=>it.positions.length > 10 || it.len > 10)
+    const accepted = _accepted.filter(it=>it.positions.length > 5 || it.len > 10)
     accepted.forEach((block, blockId)=>{
 
         block.positions.forEach(pos=>{
@@ -325,6 +326,89 @@ function decodeRepeatsRec(data){
         stepData = res;
         if (fin){
             return res;
+        }
+    }
+}
+
+function bfsLevels(root) {
+  const result = [];
+  const queue = [root];
+  while (queue.length > 0) {
+    const levelSize = queue.length;
+    const level = [];
+    for (let i = 0; i < levelSize; i++) {
+      const node = queue.shift();
+      const keys = Object.keys(node);
+      level.push(node);
+      for (let j=0; j<keys.length; j++) {
+        queue.push(node[keys[j]]);
+      }
+    }
+    result.push(level);
+  }
+  return result;
+}
+
+function minUniqueSeq(arr){
+    const tree = {}
+    console.log(arr)
+    const str = arr.join('').split('');
+    let loadedLevel = 0;
+    const loadLevel = (level)=> {
+        str.forEach((it, i)=>{
+            if (i >= str.length-level +1){
+                return;
+            }
+            let treeNode = tree;
+            for(let j=0; j<level; j++){
+                if(!treeNode[str[i+j]]){
+                    treeNode[str[i+j]] = {}
+                } 
+                treeNode = treeNode[str[i+j]];
+            }
+        });
+        console.log(tree);
+    }
+
+    loadLevel(1)
+    const alphabet = Object.keys(tree);
+
+    const findCandidate = (currentNode, prefix, last, level)=>{
+        if ( level >= loadedLevel){
+            return;
+        }
+
+        for (let i = 0; i< alphabet.length; i++){
+            const key = alphabet[i];
+            if (last == key){
+                continue;
+            }
+            if (currentNode[key] == undefined){
+                return prefix + key;
+            }
+        }
+
+        const keys = Object.keys(currentNode);
+        for (let i = 0; i< keys.length; i++){
+            const key = keys[i]
+            const subNode = currentNode[key];
+            if (subNode != undefined){
+                const res = findCandidate(subNode, prefix + key, key, level + 1);
+                if (res) {
+                    return res;
+                }
+            } else {
+                return prefix + key
+            }
+        }
+    }
+
+    for (let i = 0; i< 10; i++){
+        loadLevel(i + 2);
+        loadedLevel = i +2
+        const candidate = findCandidate(tree, '', '', 1);
+        if (candidate){
+            return candidate;
         }
     }
 }

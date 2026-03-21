@@ -258,7 +258,7 @@ const app = ()=>{
 
     const particles = [];
 
-    for(let i = 0; i<2220; i++){
+    for(let i = 0; i<4220; i++){
         particles.push({
             x: 7,
             y: 0,
@@ -273,6 +273,7 @@ const app = ()=>{
         const tempmap = new Array(bitmap.length).fill(null).map(row=>new Array(bitmap[0].length).fill(0));
         particles.forEach(particle=>{
             tempmap[particle.y][particle.x]++;
+            particle.move = false;
         });
         /*particles.sort((a, b)=>{
             if (![undefined, '8'].includes(bitmap[a.y+1]?.[a.x]) && tempmap[a.y+1]?.[a.x] == 0 && ![undefined, '8'].includes(bitmap[b.y+1]?.[b.x]) && tempmap[b.y+1]?.[b.x] != 0){
@@ -290,6 +291,19 @@ const app = ()=>{
             return 0
         });
         particles.forEach(particle=>{
+            //tempmap[particle.y][particle.x]++;
+            if (![undefined, '8'].includes(bitmap[particle.y+1]?.[particle.x]) && tempmap[particle.y+1]?.[particle.x] == 0){
+                tempmap[particle.y][particle.x]--;
+                particle.y +=1;
+                tempmap[particle.y][particle.x]++;
+                particle.dir = 0;
+                particle.move = true;
+            }
+        })
+        particles.forEach(particle=>{
+            if (particle.move){
+                return;
+            }
             //tempmap[particle.y][particle.x]++;
             if (![undefined, '8'].includes(bitmap[particle.y+1]?.[particle.x]) && tempmap[particle.y+1]?.[particle.x] == 0){
                 tempmap[particle.y][particle.x]--;
@@ -336,6 +350,7 @@ const app = ()=>{
         ctx.strokeStyle = '#000';
         bitmap.forEach((row, y)=>{
             row.forEach((cell, x)=>{
+                ctx.strokeStyle = '#0003';
                 ctx.strokeRect(x* size, y* size, size, size);
                 ctx.fillStyle = cell == '8' ? '#090' : '#990';
                 ctx.fillRect(x* size, y* size, size, size);
@@ -365,49 +380,71 @@ const app = ()=>{
         }
         ctx.fillStyle = '#ccc';
         ctx.drawImage(cacheBg, 0, 0);
-        const pmap = particles.map(it=>{
-            return {...it, used: false};
-        })
+
+        const renderPolys = (pmap, tempmap, color, border)=>{
+            pmap.forEach(particle=>{
+                const poly = getPoly(particle, tempmap);
+                if (!poly || poly.length < 4){
+                    return;
+                }
+                floodFill(tempmap, particle.x, particle.y);
+            
+                ctx.beginPath();
+                ctx.moveTo(poly[poly.length -1].x* size, poly[poly.length -1].y* size, size, size);
+                poly.forEach((it, i)=>{
+                    const {x,y}=it;
+                    //if (i==0){
+                        //ctx.moveTo(x* size, y* size, size, size);
+                    //} else {
+                        ctx.lineTo(x* size, y* size, size, size);
+                    //}
+                });
+                //ctx.closePath();
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = border || '#909';
+                ctx.fillStyle = color || '#0094';
+                ctx.fill();
+                ctx.stroke();
+                ctx.lineWidth = 1;
+
+                if (!particle.used){
+
+                }
+                /*const {x, y} = particle;
+                ctx.strokeRect(x* size, y* size, size, size);
+                ctx.fillStyle = '#0094';
+                ctx.fillRect(x* size, y* size, size, size);*/
+            })
+        }
 
         const tempmap = new Array(bitmap.length).fill(null).map(row=>new Array(bitmap[0].length).fill('-'));
         particles.forEach(particle=>{
             tempmap[particle.y][particle.x] = '8';
         });
 
-
-        pmap.forEach(particle=>{
-            const poly = getPoly(particle, tempmap);
-            if (!poly || poly.length < 4){
-                return;
-            }
-            floodFill(tempmap, particle.x, particle.y);
-        
-            ctx.beginPath();
-            ctx.moveTo(poly[poly.length -1].x* size, poly[poly.length -1].y* size, size, size);
-            poly.forEach((it, i)=>{
-                const {x,y}=it;
-                //if (i==0){
-                    //ctx.moveTo(x* size, y* size, size, size);
-                //} else {
-                    ctx.lineTo(x* size, y* size, size, size);
-                //}
-            });
-            //ctx.closePath();
-            ctx.lineWidth = 2;
-            ctx.strokeStyle = '#909';
-            ctx.fillStyle = '#0094';
-            ctx.fill();
-            ctx.stroke();
-            ctx.lineWidth = 1;
-
-            if (!particle.used){
-
-            }
-            /*const {x, y} = particle;
-            ctx.strokeRect(x* size, y* size, size, size);
-            ctx.fillStyle = '#0094';
-            ctx.fillRect(x* size, y* size, size, size);*/
+        const pmap = particles.filter(it=>!(tempmap[it.y - 1]?.[it.x] != '8' && bitmap[it.y - 1]?.[it.x] != '8')).map(it=>{
+            return {...it, used: false};
         })
+
+        const tempmapNoTop = new Array(bitmap.length).fill(null).map(row=>new Array(bitmap[0].length).fill('-'));
+        pmap.forEach(particle=>{
+            tempmapNoTop[particle.y][particle.x] = '8';
+        });
+
+        const pmapTop = particles.filter(it=>tempmap[it.y - 1]?.[it.x] != '8' && bitmap[it.y - 1]?.[it.x] != '8').map(it=>{
+            return {...it, used: false};
+        });
+        //console.log(pmapTop.length)
+
+        const tempmapTop = new Array(bitmap.length).fill(null).map(row=>new Array(bitmap[0].length).fill('-'));
+        pmapTop.forEach(particle=>{
+            tempmapTop[particle.y][particle.x] = '8';
+        });
+
+        renderPolys(pmapTop, tempmapTop, '#ccf', '#0000');
+        renderPolys(pmap, tempmapNoTop, '#99f', '#0000');
+        //renderPolys(pmap, tempmap);
+
     }
     
     render(true);

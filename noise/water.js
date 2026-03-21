@@ -52,6 +52,158 @@ function toBitmap(img, pos, threshold, zero = '-', one = '8') {
     return [arr, selectColor.map(it=>(it.toString(16).length == 1? '0' : '')+it.toString(16)).join('')];
 }
 
+const getPoly = (spos, bitmap)=>{
+    if (bitmap[spos.y]?.[spos.x] !== '8') {
+        //console.log('emp')
+        return;
+    }
+    /*const getInitialPos = ()=>{
+        let index = -1;
+        const rowIndex = bitmap.findIndex((row)=>{
+            index = row.findIndex(cell=>{
+                return cell == '8';
+            })
+            return index != -1;
+        });
+        return {x: index, y: rowIndex}
+    }*/
+    const getInitialPos = ()=>{
+        let index = spos.x;
+        const rowIndex = spos.y;
+        while(bitmap[rowIndex]?.[index - 1] == '8'){
+            index--;
+        }
+        return {x: index, y: rowIndex}
+    }
+
+    const pos = getInitialPos();
+    const player = {
+        x: pos.x,
+        y: pos.y,
+        direction: 0
+    }
+
+    const moves = [
+        { x: 1, y: 0 },
+        { x: 0, y: 1 },
+        { x: -1, y: 0 },
+        { x: 0, y: -1 },
+    ]
+
+    const leftHand = [
+        { x: 0, y: -1 },
+        { x: 1, y: 0 },
+        { x: 0, y: 1 },
+        { x: -1, y: 0 },
+    ]
+
+    const dirs = [
+        -1,
+        0,
+        1,
+        2
+    ]
+
+    const poly = [];
+
+    const tryMove = () => {
+        if (bitmap[player.y + moves[player.direction].y]?.[player.x + moves[player.direction].x] == '8') {
+            player.x = player.x + moves[player.direction].x;
+            player.y = player.y + moves[player.direction].y;
+            //draw();
+            return true;
+        }
+        //draw();
+    }
+
+    const step = () => {
+        const initDir = player.direction;
+
+        for (let rots = 0; rots < 4; rots++) {
+            if ((player.direction == 1 && rots == 3) || (player.direction == 1 && rots == 2)) {
+                const lastPos = { ...player }
+                poly.push({ x: lastPos.x + 1, y: lastPos.y + 1 });
+            }
+
+            player.direction = (4 + initDir + dirs[rots]) % 4;
+
+            //console.log('post', player.direction, rots)
+            {
+                const lastPos = { ...player }
+                 if (
+                       (player.direction == 3 && rots == 0)
+                    || (player.direction == 2 && rots == 0)
+                    || (player.direction == 1 && rots == 1)
+                    || (player.direction == 2 && rots == 1)
+                    || (player.direction == 3 && rots == 1) 
+                    || (player.direction == 1 && rots == 2)
+                    || (player.direction == 2 && rots == 2)
+                    || (player.direction == 0 && rots == 3)
+                    || (player.direction == 1 && rots == 3)
+                    || (player.direction == 2 && rots == 3)
+                    || (player.direction == 3 && rots == 3) 
+                ) {
+                //if (bitmap[player.y + leftHand[player.direction].y]?.[player.x + leftHand[player.direction].x] != '8') {
+                    const point = { x: lastPos.x + (leftHand[lastPos.direction].x <= 0 ? 0 : 1), y: lastPos.y + (leftHand[lastPos.direction].y <= 0 ? 0 : 1) };
+                    if (poly.length && (poly[0].x == point.x && poly[0].y == point.y)){
+                        return true;
+                    } else if (poly.length == 0 || (poly[poly.length -1].x != point.x || poly[poly.length -1].y != point.y)){
+                        poly.push(point);
+                    }
+                }
+            }
+
+            if (tryMove()) {
+                //draw()
+                return;
+            }
+        }
+    }
+
+    for (let i=0; i<100000; i++){
+        if (step()){
+            break;
+        }
+    }
+    return poly;
+}
+
+const floodFill = (map, startX, startY) => {
+    //const H = map.length;
+    //const W = map[0].length;
+
+    const moves = [
+        { x: 1, y: 0 },
+        { x: 0, y: 1 },
+        { x: -1, y: 0 },
+        { x: 0, y: -1 },
+    ];
+
+    // если старт не пустой — ничего не делаем
+    if (map[startY]?.[startX] !== '8') {
+        //console.log('emp')
+        return;
+    }
+
+    //console.log('ne')
+    const stack = [{ x: startX, y: startY }];
+
+    while (stack.length) {
+        const { x, y } = stack.pop();
+
+        // проверка границ и типа
+        if (map[y]?.[x] !== '8') continue;
+
+        // заливаем
+        map[y][x] = '-'; // или null, или '8' если хочешь "стереть"
+
+        // добавляем соседей
+        for (const m of moves) {
+            stack.push({ x: x + m.x, y: y + m.y });
+        }
+    }
+};
+
 const bitmapTemplate = [
     '----8-------8888---',
     '----88-----88888---',
@@ -84,7 +236,9 @@ const app = ()=>{
     }
 
     const loop = ()=>{
-        render()
+        for (let i = 0; i< 10; i++){
+            render()
+        }
         requestAnimationFrame(()=>{
            loop(); 
         })
@@ -104,7 +258,7 @@ const app = ()=>{
 
     const particles = [];
 
-    for(let i = 0; i<1220; i++){
+    for(let i = 0; i<2220; i++){
         particles.push({
             x: 7,
             y: 0,
@@ -119,6 +273,21 @@ const app = ()=>{
         const tempmap = new Array(bitmap.length).fill(null).map(row=>new Array(bitmap[0].length).fill(0));
         particles.forEach(particle=>{
             tempmap[particle.y][particle.x]++;
+        });
+        /*particles.sort((a, b)=>{
+            if (![undefined, '8'].includes(bitmap[a.y+1]?.[a.x]) && tempmap[a.y+1]?.[a.x] == 0 && ![undefined, '8'].includes(bitmap[b.y+1]?.[b.x]) && tempmap[b.y+1]?.[b.x] != 0){
+                return -1;
+            }
+            if (![undefined, '8'].includes(bitmap[b.y+1]?.[b.x]) && tempmap[b.y+1]?.[b.x] == 0 && ![undefined, '8'].includes(bitmap[a.y+1]?.[a.x]) && tempmap[a.y+1]?.[a.x] != 0){
+                return 1;
+            }
+            return 0;
+        });*/
+        particles.sort((a, b)=>{
+            if (a.y !== b.y) return b.y - a.y;
+            if (a.dir < 0 && b.dir < 0) return a.x - b.x;
+            if (a.dir > 0 && b.dir > 0) return b.x - a.x;
+            return 0
         });
         particles.forEach(particle=>{
             //tempmap[particle.y][particle.x]++;
@@ -174,7 +343,7 @@ const app = ()=>{
         });
     }
 
-    const render = (hard = false)=>{
+    const render1 = (hard = false)=>{
         process();
         if (hard){
             renderBg();
@@ -186,6 +355,58 @@ const app = ()=>{
             ctx.strokeRect(x* size, y* size, size, size);
             ctx.fillStyle = '#0094';
             ctx.fillRect(x* size, y* size, size, size);
+        })
+    }
+
+    const render/*Poly*/ = (hard = false)=>{
+        process();
+        if (hard){
+            renderBg();
+        }
+        ctx.fillStyle = '#ccc';
+        ctx.drawImage(cacheBg, 0, 0);
+        const pmap = particles.map(it=>{
+            return {...it, used: false};
+        })
+
+        const tempmap = new Array(bitmap.length).fill(null).map(row=>new Array(bitmap[0].length).fill('-'));
+        particles.forEach(particle=>{
+            tempmap[particle.y][particle.x] = '8';
+        });
+
+
+        pmap.forEach(particle=>{
+            const poly = getPoly(particle, tempmap);
+            if (!poly || poly.length < 4){
+                return;
+            }
+            floodFill(tempmap, particle.x, particle.y);
+        
+            ctx.beginPath();
+            ctx.moveTo(poly[poly.length -1].x* size, poly[poly.length -1].y* size, size, size);
+            poly.forEach((it, i)=>{
+                const {x,y}=it;
+                //if (i==0){
+                    //ctx.moveTo(x* size, y* size, size, size);
+                //} else {
+                    ctx.lineTo(x* size, y* size, size, size);
+                //}
+            });
+            //ctx.closePath();
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = '#909';
+            ctx.fillStyle = '#0094';
+            ctx.fill();
+            ctx.stroke();
+            ctx.lineWidth = 1;
+
+            if (!particle.used){
+
+            }
+            /*const {x, y} = particle;
+            ctx.strokeRect(x* size, y* size, size, size);
+            ctx.fillStyle = '#0094';
+            ctx.fillRect(x* size, y* size, size, size);*/
         })
     }
     

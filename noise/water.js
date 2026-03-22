@@ -403,7 +403,7 @@ const app = ()=>{
                 particle.y +=1;
                 tempmap[particle.y][particle.x]++;
                 //particle.dir = 0;
-                //particle.move = true;
+                particle.move = true; //setting
             }
         })
         particles.forEach(particle=>{
@@ -411,11 +411,12 @@ const app = ()=>{
                 return;
             }
             //tempmap[particle.y][particle.x]++;
-            if (![undefined, '8'].includes(bitmap[particle.y+1]?.[particle.x]) && tempmap[particle.y+1]?.[particle.x] == 0 && particle.vdir == 0){
-                tempmap[particle.y][particle.x]--;
+            if (![undefined, '8'].includes(bitmap[particle.y+1]?.[particle.x]) && tempmap[particle.y+1]?.[particle.x] == 0 /*&& particle.vdir == 0*/){
+               /* tempmap[particle.y][particle.x]--;
                 particle.y +=1;
                 tempmap[particle.y][particle.x]++;
-                particle.dir = 0;
+                particle.dir = 0;*/
+                //try change upper
             } else {
                 if (particle.dir == 0){
                     particle.dir = Math.random()<0.5? 1 : -1;

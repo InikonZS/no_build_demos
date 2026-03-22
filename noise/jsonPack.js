@@ -29,10 +29,14 @@ inp.onchange = ()=>{
     processFile(inp.files[0], (text)=>{
         const obj = JSON.parse(text);
         const encoded = convert(obj);
+        const tunk = unconvert(encoded);
+        console.log('TEST', text == JSON.stringify(tunk), text.length, JSON.stringify(tunk).length, obj, tunk, encoded);
         const dicted = compressDictionary(encoded);
         console.log(dicted)
         const packed = packBase(dicted);
         console.log(packed)
+        const unpacked = decompressDictionary(unpackBase(packed));//JSON.stringify(unconvert(decompressDictionary(unpackBase(packed))));
+        console.log(unpacked, encoded)
     })
 }
 
@@ -40,15 +44,24 @@ const convert = (obj)=>{
     const structure = [];
     const strings = [];
     const numbers = [];
+    const debug = [];
+    const debCount ={ar:0, ob:0, obc:0, arc:0, prim:0};
 
     const iterateObject = (obj, parentKey)=>{
-        if (parentKey){
+        if (parentKey != undefined){
+            if (typeof parentKey !='string'){
+                console.log('tes', 'very bad')
+            }
             strings.push(parentKey);
+            debug.push(parentKey);
             //structure.push('s');
         }
         if (obj && typeof obj == 'object' && !Array.isArray(obj)){
             structure.push('{')
+            debCount.obc++;
             Object.keys(obj).forEach((childKey)=>{
+                debCount.ob++;
+                //console.log(childKey);
                 iterateObject(obj[childKey], childKey);
             })
             structure.push('}')
@@ -56,24 +69,39 @@ const convert = (obj)=>{
 
         if (obj && Array.isArray(obj)){
             structure.push('[')
+            debCount.arc++;
             obj.forEach((child)=>{
+                debCount.ar++;
                 iterateObject(child);
             });
             //structure.push(']')
-            structure.push('}')
+            structure.push(']')
         }
 
         if (typeof obj == 'string'){
+            debCount.prim++;
             structure.push('s');
             strings.push(obj);
         }
         
         if (typeof obj == 'number'){
-            structure.push('d'),
+            debCount.prim++;
+            structure.push('d');
             numbers.push(obj);
         }
 
+        if (obj === true){
+            debCount.prim++;
+            structure.push('t');
+        }
+
+        if (obj === false){
+            debCount.prim++;
+            structure.push('f');
+        }
+
         if (obj == null){
+            debCount.prim++;
             structure.push('n')
         }
     }
@@ -81,7 +109,9 @@ const convert = (obj)=>{
     return {
         structure,
         strings: strings.reverse(),
-        numbers: numbers.reverse()
+        numbers: numbers.reverse(),
+        debug,
+        debCount
     }
 }
 
@@ -94,11 +124,17 @@ const unconvert = (_encoded)=>{
         strings: [..._encoded.strings],
         numbers: [..._encoded.numbers],
         structure: [..._encoded.structure],
+        debug: {s: 0, ss: 0, sss: 0, ar: 0, obc:0,arc:0,prim:0}
     }
     encoded.structure.forEach(it=>{
+        const stepLenSum = encoded.strings.length + '_' + encoded.numbers.length;
+        const lp = currentParent;
+
         if (it == '{'){
+                encoded.debug.obc++;
             if (currentParent && typeof currentParent == 'object' && !Array.isArray(currentParent)){
                 //if (key){
+                encoded.debug.sss++;
                 const key = encoded.strings.pop();
                     const obj = {};
                     currentParent[key] = obj;
@@ -119,15 +155,17 @@ const unconvert = (_encoded)=>{
                 result = {};
                 parentStack.push(result);
                 currentParent = parentStack[parentStack.length - 1];
-            }        
-        }
+            }       
+        }else
         if (it == '}'){
             parentStack.pop();
             currentParent = parentStack[parentStack.length - 1];
-        }
+        }else
         if (it == '['){
+            encoded.debug.arc++;
             if (currentParent && typeof currentParent == 'object' && !Array.isArray(currentParent)){
                 //if (key){
+                encoded.debug.sss++;
                     const key = encoded.strings.pop();
                     const obj = [];
                     currentParent[key] = obj;
@@ -149,51 +187,79 @@ const unconvert = (_encoded)=>{
                 parentStack.push(result);
                 currentParent = parentStack[parentStack.length - 1];
             }    
-        }
+        }else
         if (it == ']'){
             parentStack.pop();
             currentParent = parentStack[parentStack.length - 1];
-        }
+        }else
         if (it == 's'){
+            encoded.debug.prim++;
             if (currentParent && typeof currentParent == 'object' && !Array.isArray(currentParent)){
                 //if (!key){
                     //key = encoded.strings.pop();
                 //} else {
+                    encoded.debug.sss++;
                     const key = encoded.strings.pop();
                     currentParent[key] = encoded.strings.pop();
+                    encoded.debug.s++;
                    // key = '';
                 //}
             }
 
             if (currentParent && Array.isArray(currentParent)){
                 currentParent.push(encoded.strings.pop());
+                encoded.debug.s++;
             }
-        }
+        }else
         if (it == 'd'){
+            encoded.debug.prim++;
             if (currentParent && typeof currentParent == 'object' && !Array.isArray(currentParent)){
                 //if (key){
+                encoded.debug.sss++;
                 const key = encoded.strings.pop();
                     currentParent[key] = encoded.numbers.pop();
+                    if (currentParent[key] == undefined){
+                        console.log('tes wrong')
+                    }
                    // key = '';
                 //}
             }
             if (currentParent && Array.isArray(currentParent)){
                 currentParent.push(encoded.numbers.pop());
             }
-        }
-        if (it == 'n'){
+        }else
+        if (it == 'n' || it=='t' || it=='f'){
+            encoded.debug.prim++;
             if (currentParent && typeof currentParent == 'object' && !Array.isArray(currentParent)){
                 //if (key){
+                encoded.debug.sss++;
                 const key = encoded.strings.pop();
-                    currentParent[key] = null;
+                    currentParent[key] = {'n':null,'t':true, 'f':false}[it];
+                
                     //key = '';
                 //}
             }
             if (currentParent && Array.isArray(currentParent)){
-                currentParent.push(null);
+                currentParent.push({'n':null,'t':true, 'f':false}[it]);
+            }
+        }else {
+            console.log('tes', 'sheeet')
+        }
+        const stepLenSumE = encoded.strings.length + '_' + encoded.numbers.length;
+        if (stepLenSum == stepLenSumE && !['}',']'].includes(it) && lp && typeof lp == 'object' && !Array.isArray(lp) ){
+            console.log('tes shit')
+        } else {
+            if (!['}',']'].includes(it) && lp && typeof lp == 'object' && !Array.isArray(lp)){
+            encoded.debug.ss++;
+            }else
+            if (!['}',']'].includes(it) && lp && Array.isArray(lp)){
+            encoded.debug.ar++;
+            }else if(!['}',']'].includes(it)) {
+                console.log('tes', 'wtf')
             }
         }
     })
+    console.log('tes deb', encoded, parentStack);
 
     return result;
 }
@@ -338,7 +404,7 @@ const B64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
 const unpackBase = (packed)=>{
     const B64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-    const structureBase64 = packed.structure.split('');
+    const structureBase64 = (typeof packed.structure == 'string') ? packed.structure.split(''): huffmanDecodeRecursive(packed.structure).split('');
 
     const structure = [];
     const unChunk = [
@@ -362,8 +428,8 @@ const unpackBase = (packed)=>{
     }
     const result = {
         dictionary: packed.dictionary.split(','),
-        strings: [...uint16FromBase64(packed.strings)],
-        numbers: [...float32FromBase64(packed.numbers)],
+        strings: decodeRepeatsRec(huffmanDecodeRecursive(packed.strings).split(',')).map(it=>parseInt(it)),//[...uint16FromBase64(packed.strings)],
+        numbers: decodeRepeatsRec(huffmanDecodeRecursive(packed.numbers).split(',')).map(it=>parseFloat(it)),//[...float32FromBase64(packed.numbers)],
         structure: structure
     }
     return result;
@@ -568,6 +634,55 @@ const huffmanEncode = (str)=>{
     const compressed = (total / source * 100).toFixed(4);
     console.log('eff:', 't:'+tableLen,'+ d:'+ huffLen +'='+(huffLen+tableLen), source, compressed+'%')
     return {result, correction, hcodes};
+}
+
+const huffmanDecode = ({result, correction, hcodes: _hcodes})=>{
+    const hcodes = _hcodes;//JSON.parse(_hcodes);
+    const unB64 = {};
+    B64.split('').forEach((it,i)=>{
+        unB64[it] = i.toString(2);
+        while(unB64[it].length<6){
+            unB64[it] = '0'+unB64[it];
+        }
+    })
+    const bitbuf = [];
+    result.split('').forEach(it=>{
+        const word = unB64[it].toString();
+        bitbuf.push(word);
+    })
+    let bitstr = bitbuf.join('');
+    bitstr = bitstr.slice(0, bitstr.length - correction);
+    
+    const uncoded = [];
+    let candidate = '';
+    bitstr.split('').forEach(it=>{
+        candidate+=it;
+        if (hcodes[candidate]){
+            uncoded.push(hcodes[candidate]);
+            candidate = '';
+        }
+    });
+    return uncoded.join('');
+}
+
+const huffmanDecodeRecursive = ({result, correction, hcodes: _hcodes})=>{
+    const restoreCodes = (codes)=>{
+        const res = {};
+        let ucodes = (typeof codes.codes == 'string') ? codes.codes.split(','): huffmanDecodeRecursive(codes.codes);
+        let uvals = (typeof codes.value == 'string') ? JSON.parse(codes.value) : huffmanDecodeRecursive(codes.value);
+        
+        ucodes = (typeof ucodes == 'string') ? ucodes.split(',') : ucodes;
+        uvals =( typeof uvals == 'string') ? JSON.parse(uvals) : uvals;
+        ucodes.forEach((it,i)=>{
+            res[it]=uvals[i];
+        })
+        return res;
+    }
+    let hcodes = (typeof _hcodes == 'string') ? JSON.parse(_hcodes) : _hcodes;
+    if (hcodes.codes){
+        hcodes = restoreCodes(hcodes)//huffmanDecodeRecursive(hcodes);
+    }
+    return huffmanDecode({result, correction, hcodes});
 }
 
 const cv = convert({

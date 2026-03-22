@@ -168,7 +168,7 @@ const getPoly = (spos, bitmap)=>{
     return poly;
 }
 
-const floodFill = (map, startX, startY) => {
+const floodFill = (map, startX, startY, onRemove) => {
     //const H = map.length;
     //const W = map[0].length;
 
@@ -196,6 +196,7 @@ const floodFill = (map, startX, startY) => {
 
         // заливаем
         map[y][x] = '-'; // или null, или '8' если хочешь "стереть"
+        onRemove?.({x, y});
 
         // добавляем соседей
         for (const m of moves) {
@@ -219,6 +220,31 @@ const bitmapTemplate = [
     '-----88888888888---',
 ].map(it=>it.split(''));
 
+const smooth = (arr)=>{
+    const val = (v)=>v=='-'? 0 : 1;
+    const valArr = new Array(arr.length).fill(null).map(row=>new Array(arr[0].length).fill(0));
+    arr.forEach((row, y)=>{
+        row.forEach((cell,x)=>{
+            valArr[y][x] = val(cell);
+        })
+    })
+    valArr.forEach((row, y)=>{
+        row.forEach((cell,x)=>{
+            if (valArr[y+1]?.[x+1]!=undefined && valArr[y]?.[x+1]!=undefined && valArr[y+1]?.[x]!=undefined){
+                valArr[y][x] = (valArr[y][x] + valArr[y+1]?.[x+1] + valArr[y]?.[x+1] + valArr[y+1]?.[x]) / 4
+            }
+        })
+    });
+    const res = (v)=>v<0.25? '-' : '8';
+    const resArr = new Array(arr.length).fill(null).map(row=>new Array(arr[0].length).fill(0));
+        valArr.forEach((row, y)=>{
+        row.forEach((cell,x)=>{
+            resArr[y][x] = res(cell)
+        })
+    })
+    return resArr;
+}
+
 const app = ()=>{
     const inp = document.createElement('input');
     inp.type = 'file';
@@ -236,7 +262,7 @@ const app = ()=>{
     }
 
     const loop = ()=>{
-        for (let i = 0; i< 10; i++){
+        for (let i = 0; i< 1; i++){
             render()
         }
         requestAnimationFrame(()=>{
@@ -246,11 +272,29 @@ const app = ()=>{
 
 
     const canvas = document.createElement('canvas');
-    canvas.onclick = ()=>{
+    canvas.onclick = (e)=>{
         console.log('rend');
-        loop();
+        if (e.ctrlKey == false) {
         //render();
+        for(let i = 0; i<200; i++){
+        particles.push({
+            x: Math.floor(e.offsetX / size),
+            y: Math.floor(e.offsetY / size),
+            dir: 0,
+            pressure: 0,
+            vdir: 0
+        })
+        } 
+    }else {
+            for(let i = -4; i<4; i++){
+                for(let j = -4; j<4; j++){
+                bitmap[Math.floor(e.offsetY / size)+i][Math.floor(e.offsetX / size)+j] = '-'
+            }
+            }
+            render(true)
+        }
     }
+    //loop();
     canvas.width = 856;
     canvas.height = 656;
     document.body.append(canvas);
@@ -258,11 +302,13 @@ const app = ()=>{
 
     const particles = [];
 
-    for(let i = 0; i<4220; i++){
+    for(let i = 0; i<20; i++){
         particles.push({
             x: 7,
             y: 0,
-            dir: 0
+            dir: 0,
+            pressure: 0,
+            vdir: 0
         })
     }
 
@@ -271,10 +317,67 @@ const app = ()=>{
     const process = ()=>{
         //globalWave = (globalWave + 1) % 10;
         const tempmap = new Array(bitmap.length).fill(null).map(row=>new Array(bitmap[0].length).fill(0));
+        
         particles.forEach(particle=>{
             tempmap[particle.y][particle.x]++;
             particle.move = false;
         });
+
+        ///hudrostatic, disable for sand simulation
+        const watermap = new Array(bitmap.length).fill(null).map(row=>new Array(bitmap[0].length).fill('-'));
+        particles.forEach(particle=>{
+            watermap[particle.y][particle.x] = '8';
+        });
+        const indexedParticles = {};
+            particles.forEach(particle=>{
+            indexedParticles[`${particle.x}_${particle.y}`] = particle;
+        });
+        //const chunks = [];
+        watermap.forEach((row, y)=>{
+            row.forEach((cell,x)=>{
+                const chunk = [];
+                let top = 10000;
+                floodFill(watermap, x, y, (pos)=>{
+                    top = Math.min(pos.y, top);
+                    chunk.push(indexedParticles[`${pos.x}_${pos.y}`]);
+                });
+                chunk.forEach(particle=>{
+                    particle.pressure = particle.y - top;//(particle.pressure *31 + ( particle.y - top ))/32;
+                });
+                const tops = chunk.filter(it=>it.pressure == 0);
+                const topsPressed = chunk.filter(it=>it.pressure > 1 && tempmap[it.y-1]?.[it.x] == 0 && ![undefined, '8'].includes(bitmap[it.y-1]?.[it.x]));
+                topsPressed.sort((a, b)=>{
+                    return b.pressure - a.pressure;
+                });
+                if (topsPressed[0] && tops[0]){
+                    tempmap[tops[0].y][tops[0].x]--;
+                    tops[0].y = topsPressed[0].y-1;
+                    tops[0].x = topsPressed[0].x;
+                    tempmap[tops[0].y][tops[0].x]++;
+                    tops[0].pressure = topsPressed[0].pressure - 1;
+                }
+                //chunks.push(chunk);
+            })
+        });
+        ///end hydrostatic
+        /*particles.sort((a, b)=>{
+            return -b.pressure + a.pressure;
+        });
+        particles.forEach(particle=>{
+            //tempmap[particle.y][particle.x]++;
+            if (![undefined, '8'].includes(bitmap[particle.y-1]?.[particle.x]) && tempmap[particle.y-1]?.[particle.x] == 0 && tempmap[particle.y+1]?.[particle.x] != 0 && particle.pressure>2){
+                tempmap[particle.y][particle.x]--;
+                particle.y -=1;
+                tempmap[particle.y][particle.x]++;
+                particle.pressure--;
+                //particle.dir = 0;
+                particle.vdir-=1;
+                //particle.move = true;
+            } else {
+                particle.vdir = Math.min(0, particle.vdir + 1);
+            }
+        })*/
+
         /*particles.sort((a, b)=>{
             if (![undefined, '8'].includes(bitmap[a.y+1]?.[a.x]) && tempmap[a.y+1]?.[a.x] == 0 && ![undefined, '8'].includes(bitmap[b.y+1]?.[b.x]) && tempmap[b.y+1]?.[b.x] != 0){
                 return -1;
@@ -291,13 +394,16 @@ const app = ()=>{
             return 0
         });
         particles.forEach(particle=>{
+            if (particle.move){
+                return;
+            }
             //tempmap[particle.y][particle.x]++;
             if (![undefined, '8'].includes(bitmap[particle.y+1]?.[particle.x]) && tempmap[particle.y+1]?.[particle.x] == 0){
                 tempmap[particle.y][particle.x]--;
                 particle.y +=1;
                 tempmap[particle.y][particle.x]++;
-                particle.dir = 0;
-                particle.move = true;
+                //particle.dir = 0;
+                //particle.move = true;
             }
         })
         particles.forEach(particle=>{
@@ -305,7 +411,7 @@ const app = ()=>{
                 return;
             }
             //tempmap[particle.y][particle.x]++;
-            if (![undefined, '8'].includes(bitmap[particle.y+1]?.[particle.x]) && tempmap[particle.y+1]?.[particle.x] == 0){
+            if (![undefined, '8'].includes(bitmap[particle.y+1]?.[particle.x]) && tempmap[particle.y+1]?.[particle.x] == 0 && particle.vdir == 0){
                 tempmap[particle.y][particle.x]--;
                 particle.y +=1;
                 tempmap[particle.y][particle.x]++;
@@ -316,6 +422,9 @@ const app = ()=>{
                 }
                 let move = false;
                 if (![undefined, '8'].includes(bitmap[particle.y]?.[particle.x+1]) && tempmap[particle.y]?.[particle.x+1] == 0 && particle.dir == -1){
+                    /*if (['8'].includes(bitmap[particle.y+1]?.[particle.x+1]) && Math.random()>0.1){
+                        return;
+                    }*/
                     tempmap[particle.y][particle.x]--;
                     particle.x +=1;
                     tempmap[particle.y][particle.x]++;
@@ -323,6 +432,9 @@ const app = ()=>{
                 }
 
                 if (![undefined, '8'].includes(bitmap[particle.y]?.[particle.x-1]) && tempmap[particle.y]?.[particle.x-1] == 0 && particle.dir == 1){
+                    /*if (['8'].includes(bitmap[particle.y+1]?.[particle.x-1]) && Math.random()>0.1){
+                        return;
+                    }*/
                     tempmap[particle.y][particle.x]--;
                     particle.x -=1;
                     tempmap[particle.y][particle.x]++;
@@ -358,6 +470,29 @@ const app = ()=>{
         });
     }
 
+    const cacheFg = document.createElement('canvas');   
+    cacheFg.width = 856;
+    cacheFg.height = 656;
+    const fgCtx = cacheFg.getContext('2d');
+
+    //const size = 5;
+    
+    const renderFg = ()=>{
+        const ctx = fgCtx;
+        //ctx.fillStyle = '#ccc';
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        ctx.strokeStyle = '#000';
+        bitmap.forEach((row, y)=>{
+            row.forEach((cell, x)=>{
+                ctx.strokeStyle = cell == '8'?'#0003':'#0000';
+                ctx.strokeRect(x* size, y* size, size, size);
+                ctx.fillStyle = cell == '8' ? '#090' : '#9900';
+                ctx.fillRect(x* size, y* size, size, size);
+            })
+        });
+    }
+
     const render1 = (hard = false)=>{
         process();
         if (hard){
@@ -377,6 +512,7 @@ const app = ()=>{
         process();
         if (hard){
             renderBg();
+            renderFg();
         }
         ctx.fillStyle = '#ccc';
         ctx.drawImage(cacheBg, 0, 0);
@@ -444,10 +580,11 @@ const app = ()=>{
         renderPolys(pmapTop, tempmapTop, '#ccf', '#0000');
         renderPolys(pmap, tempmapNoTop, '#99f', '#0000');
         //renderPolys(pmap, tempmap);
-
+        ctx.drawImage(cacheFg, 0, 0);
     }
     
     render(true);
+    loop();
 }
 
 app();

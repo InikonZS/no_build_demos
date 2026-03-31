@@ -34,7 +34,7 @@ inp.onchange = ()=>{
         const dicted = compressDictionary(encoded);
         console.log(dicted)
         const packed = packBase(dicted);
-        console.log(packed)
+        console.log('tes pack', packed)
         const unpacked = decompressDictionary(unpackBase(packed));//JSON.stringify(unconvert(decompressDictionary(unpackBase(packed))));
         console.log(unpacked, encoded)
     })
@@ -335,7 +335,7 @@ const packBase = (compressed)=>{
         strings: huffmanFinal(/*JSON.stringify(compressed.strings)*/ findRepeatsRec(compressed.strings, 10).join(',').split('')),
         //10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10
         numbers: huffmanFinal(packPairIterated(findRepeatsRec(compressed.numbers, 10).join(',').split('')/*numCountMap(compressed.numbers, 2).toString().split('')*//*compressed.numbers.toString().split('')*/, [800, 125,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k])),
-        structure: huffmanFinal(packPairIterated(structureBase64, [22, 25, 20, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10]))
+        structure: huffmanFinal(packPairIterated(compressed.structure, [22, 25, 20, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10]))
         //strings: uint16ToBase64(compressed.strings),
         //numbers: float32ToBase64(compressed.numbers),
         //structure: structureBase64.join('')
@@ -430,7 +430,7 @@ const unpackBase = (packed)=>{
         dictionary: packed.dictionary.split(','),
         strings: decodeRepeatsRec(huffmanDecodeRecursive(packed.strings).split(',')).map(it=>parseInt(it)),//[...uint16FromBase64(packed.strings)],
         numbers: decodeRepeatsRec(huffmanDecodeRecursive(packed.numbers).split(',')).map(it=>parseFloat(it)),//[...float32FromBase64(packed.numbers)],
-        structure: structure
+        structure: structureBase64//structure
     }
     return result;
 }
